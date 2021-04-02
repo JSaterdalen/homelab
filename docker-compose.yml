@@ -290,6 +290,25 @@ services:
       - RINGTOKEN=${RINGTOKEN}
       - ENABLECAMERAS=true
 
+  plex:
+    image: ghcr.io/linuxserver/plex
+    container_name: plex
+    network_mode: host
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - VERSION=latest
+      # - PLEX_CLAIM= #optional
+    devices:
+      - /dev/dri:/dev/dri
+    volumes:
+      - ${HOME}/docker/plexmediaserver:/config
+      - ${VIDEO}/tv:/tv
+      - ${VIDEO}/movies:/movies
+      - ${MEDIA}/music:/music
+      - ${VIDEO}/movies-4k:/movies-4k
+    restart: unless-stopped
+
 volumes:
   teslamate-db:
   teslamate-grafana-data:
