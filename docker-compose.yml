@@ -202,9 +202,7 @@ services:
       - DATABASE_PASS=secret
       - DATABASE_NAME=teslamate
       - DATABASE_HOST=teslamate_postgres
-      - MQTT_HOST=192.168.1.10
-      - MQTT_USERNAME=mqtt
-      - MQTT_PASSWORD=Bluespacep3nguin
+      - MQTT_HOST=mosquitto
     ports:
       - 4000:4000
     volumes:
@@ -265,16 +263,13 @@ services:
       - DECONZ_DEVICE=/dev/ttyACM0
 
   mosquitto:
-    image: eclipse-mosquitto
-    container_name: mosquitto
-    network_mode: host
-    restart: always
+    image: eclipse-mosquitto:1.6
+    restart: unless-stopped
     ports:
       - 1883:1883
     volumes:
-      - ${HOME}/docker/mosquitto/config:/mosquitto/config
-      - ${HOME}/docker/mosquitto/data:/mosquitto/data
-      - ${HOME}/docker/mosquitto/log:/mosquitto/log
+      - mosquitto-conf:/mosquitto/config
+      - mosquitto-data:/mosquitto/data
 
   plex:
     image: ghcr.io/linuxserver/plex
@@ -298,3 +293,5 @@ services:
 volumes:
   teslamate-db:
   teslamate-grafana-data:
+  mosquitto-conf:
+  mosquitto-data:
