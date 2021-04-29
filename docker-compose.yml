@@ -36,39 +36,37 @@ services:
       - 5514:5514 #optional
     restart: unless-stopped
   
-  unifi-video-controller:
-    image: pducharme/unifi-video-controller:latest
-    container_name: unifi-video-controller
-    restart: always
-    network_mode: host 
-    ports:
-      - 1935:1935
-      - 6666:6666
-      - 7004:7004
-      - 7080:7080
-      - 7442:7442
-      - 7443:7443
-      - 7444:7444
-      - 7445:7445
-      - 7446:7446
-      - 7447:7447
-    volumes:
-      - ${USERDIR}/docker/unifi-video:/var/lib/unifi-video
-      - /mnt/video/unifi-video/videos:/var/lib/unifi-video/videos
-    environment:
-      - TZ=${TZ}
-      - DEBUG=1
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - CREATE_TMPFS=no
-    cap_add:
-      - DAC_READ_SEARCH
-    tmpfs:
-      - /var/cache/unifi-video
-# Uncomment security option below to set apparmor unconfined if "tmpfs is write-protected, mounting read-only" error is seen.
-# Known to happen on ubuntu, synology, and other platforms.
-    security_opt:
-      - apparmor:unconfined
+  # unifi-video-controller:
+  #   image: pducharme/unifi-video-controller:latest
+  #   container_name: unifi-video-controller
+  #   restart: always
+  #   network_mode: host 
+  #   ports:
+  #     - 1935:1935
+  #     - 6666:6666
+  #     - 7004:7004
+  #     - 7080:7080
+  #     - 7442:7442
+  #     - 7443:7443
+  #     - 7444:7444
+  #     - 7445:7445
+  #     - 7446:7446
+  #     - 7447:7447
+  #   volumes:
+  #     - ${USERDIR}/docker/unifi-video:/var/lib/unifi-video
+  #     - /mnt/video/unifi-video/videos:/var/lib/unifi-video/videos
+  #   environment:
+  #     - TZ=${TZ}
+  #     - DEBUG=1
+  #     - PUID=${PUID}
+  #     - PGID=${PGID}
+  #     - CREATE_TMPFS=no
+  #   cap_add:
+  #     - DAC_READ_SEARCH
+  #   tmpfs:
+  #     - /var/cache/unifi-video
+  #   security_opt:
+  #     - apparmor:unconfined
 
   openvpn-client:
     image: yacht7/openvpn-client
@@ -277,18 +275,6 @@ services:
       - ${HOME}/docker/mosquitto/config:/mosquitto/config
       - ${HOME}/docker/mosquitto/data:/mosquitto/data
       - ${HOME}/docker/mosquitto/log:/mosquitto/log
-
-  ring-mqtt:
-    image: tsightler/ring-mqtt
-    container_name: ring-mqtt
-    network_mode: host
-    restart: always
-    environment:
-      - host=192.168.1.6
-      - MQTTRINGTOPIC=ring_topic
-      - MQTTHASSTOPIC=hass_topic
-      - RINGTOKEN=${RINGTOKEN}
-      - ENABLECAMERAS=true
 
   plex:
     image: ghcr.io/linuxserver/plex
