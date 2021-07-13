@@ -1,18 +1,18 @@
 version: "3.6"
 services:
-  portainer:
-    image: portainer/portainer
-    container_name: portainer
-    restart: always
-    command: -H unix:///var/run/docker.sock
-    ports:
-      - "9000:9000"
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - ${USERDIR}/docker/portainer/data:/data
-      - ${USERDIR}/docker/shared:/shared
-    environment:
-      - TZ=${TZ}
+  # portainer:
+  #   image: portainer/portainer
+  #   container_name: portainer
+  #   restart: always
+  #   command: -H unix:///var/run/docker.sock
+  #   ports:
+  #     - "9000:9000"
+  #   volumes:
+  #     - /var/run/docker.sock:/var/run/docker.sock
+  #     - ${USERDIR}/docker/portainer/data:/data
+  #     - ${USERDIR}/docker/shared:/shared
+  #   environment:
+  #     - TZ=${TZ}
 
   unifi-controller:
     image: linuxserver/unifi-controller
@@ -68,41 +68,41 @@ services:
   #   security_opt:
   #     - apparmor:unconfined
 
-  openvpn-client:
-    image: yacht7/openvpn-client
-    container_name: openvpn-client
-    cap_add:
-      - NET_ADMIN
-    devices:
-      - /dev/net/tun
-    volumes:
-      - /home/josh/docker/ovpn:/data/vpn
-    restart: unless-stopped
-    environment: 
-      - KILL_SWITCH=on
-      - SUBNETS=192.168.1.0/24
-      - FORWARDED_PORTS=2970
-    ports:
-      - 2970:2970
-      - 2970:2970/udp
-      - 8088:8088
-      - 22146:22146
-      - 6080:6080
+  # openvpn-client:
+  #   image: yacht7/openvpn-client
+  #   container_name: openvpn-client
+  #   cap_add:
+  #     - NET_ADMIN
+  #   devices:
+  #     - /dev/net/tun
+  #   volumes:
+  #     - /home/josh/docker/ovpn:/data/vpn
+  #   restart: unless-stopped
+  #   environment: 
+  #     - KILL_SWITCH=on
+  #     - SUBNETS=192.168.1.0/24
+  #     - FORWARDED_PORTS=2970
+  #   ports:
+  #     - 2970:2970
+  #     - 2970:2970/udp
+  #     - 8088:8088
+  #     - 22146:22146
+  #     - 6080:6080
 
-  qbittorrent:
-    image: linuxserver/qbittorrent
-    container_name: qbittorrent
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
-      - UMASK_SET=022
-      - WEBUI_PORT=8088
-    volumes:
-      - ${HOME}/docker/qBT:/config
-      - /mnt/downloads:/downloads
-    restart: unless-stopped
-    network_mode: service:openvpn-client
+  # qbittorrent:
+  #   image: linuxserver/qbittorrent
+  #   container_name: qbittorrent
+  #   environment:
+  #     - PUID=${PUID}
+  #     - PGID=${PGID}
+  #     - TZ=${TZ}
+  #     - UMASK_SET=022
+  #     - WEBUI_PORT=8088
+  #   volumes:
+  #     - ${HOME}/docker/qBT:/config
+  #     - /mnt/downloads:/downloads
+  #   restart: unless-stopped
+  #   network_mode: service:openvpn-client
 
   sonarr:
     image: linuxserver/sonarr:latest
@@ -167,7 +167,7 @@ services:
     restart: unless-stopped
 
   tautulli:
-    image: linuxserver/tautulli
+    image: ghcr.io/linuxserver/tautulli
     container_name: tautulli
     environment:
       - PUID=${PUID}
@@ -180,18 +180,18 @@ services:
       - 8181:8181
     restart: unless-stopped
 
-  organizr:
-    image: linuxserver/organizr
-    container_name: organizr
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
-    volumes:
-      - ${HOME}/docker/organizr:/config
-    ports:
-      - 9983:80
-    restart: unless-stopped
+  # organizr:
+  #   image: linuxserver/organizr
+  #   container_name: organizr
+  #   environment:
+  #     - PUID=${PUID}
+  #     - PGID=${PGID}
+  #     - TZ=${TZ}
+  #   volumes:
+  #     - ${HOME}/docker/organizr:/config
+  #   ports:
+  #     - 9983:80
+  #   restart: unless-stopped
 
   teslamate:
     image: teslamate/teslamate:latest
@@ -289,6 +289,44 @@ services:
       - ${MEDIA}/music:/music
       - ${VIDEO}/movies-4k:/movies-4k
     restart: unless-stopped
+
+  npm:
+    container_name: npm
+    image: 'jc21/nginx-proxy-manager:latest'
+    ports:
+      - '80:80'
+      - '81:81'
+      - '443:443'
+    environment:
+      DB_MYSQL_HOST: "mariadb"
+      DB_MYSQL_PORT: 3306
+      DB_MYSQL_USER: "npm"
+      DB_MYSQL_PASSWORD: "npm"
+      DB_MYSQL_NAME: "npm"
+    volumes:
+      - ${HOME}/docker/npm:/data
+      - ${HOME}/docker/npm/letsencrypt:/etc/letsencrypt
+  mariadb:
+    container_name: mariadb
+    image: 'jc21/mariadb-aria:latest'
+    environment:
+      MYSQL_ROOT_PASSWORD: 'npm'
+      MYSQL_DATABASE: 'npm'
+      MYSQL_USER: 'npm'
+      MYSQL_PASSWORD: 'npm'
+    volumes:
+      - ${HOME}/docker/mariadb:/var/lib/mysql
+
+  bitwarden:
+    image: vaultwarden/server:latest
+    container_name: bitwarden
+    restart: always
+    environment: 
+      - WEBSOCKET_ENABLED=true
+    volumes:
+      - ${HOME}/docker/bitwarden:/data
+    ports:
+      - 7070:80
 
 volumes:
   teslamate-db:
