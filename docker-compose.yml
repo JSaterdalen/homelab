@@ -137,19 +137,6 @@ services:
       - 8181:8181
     restart: unless-stopped
 
-  # organizr:
-  #   image: linuxserver/organizr
-  #   container_name: organizr
-  #   environment:
-  #     - PUID=${PUID}
-  #     - PGID=${PGID}
-  #     - TZ=${TZ}
-  #   volumes:
-  #     - ${HOME}/docker/organizr:/config
-  #   ports:
-  #     - 9983:80
-  #   restart: unless-stopped
-
   teslamate:
     image: teslamate/teslamate:latest
     container_name: teslamate
