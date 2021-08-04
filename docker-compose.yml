@@ -1,19 +1,5 @@
 version: "3.6"
 services:
-  # portainer:
-  #   image: portainer/portainer
-  #   container_name: portainer
-  #   restart: always
-  #   command: -H unix:///var/run/docker.sock
-  #   ports:
-  #     - "9000:9000"
-  #   volumes:
-  #     - /var/run/docker.sock:/var/run/docker.sock
-  #     - ${USERDIR}/docker/portainer/data:/data
-  #     - ${USERDIR}/docker/shared:/shared
-  #   environment:
-  #     - TZ=${TZ}
-
   unifi-controller:
     image: linuxserver/unifi-controller
     container_name: unifi-controller
@@ -35,74 +21,45 @@ services:
       - 6789:6789 #optional
       - 5514:5514 #optional
     restart: unless-stopped
-  
-  # unifi-video-controller:
-  #   image: pducharme/unifi-video-controller:latest
-  #   container_name: unifi-video-controller
-  #   restart: always
-  #   network_mode: host 
-  #   ports:
-  #     - 1935:1935
-  #     - 6666:6666
-  #     - 7004:7004
-  #     - 7080:7080
-  #     - 7442:7442
-  #     - 7443:7443
-  #     - 7444:7444
-  #     - 7445:7445
-  #     - 7446:7446
-  #     - 7447:7447
-  #   volumes:
-  #     - ${USERDIR}/docker/unifi-video:/var/lib/unifi-video
-  #     - /mnt/video/unifi-video/videos:/var/lib/unifi-video/videos
-  #   environment:
-  #     - TZ=${TZ}
-  #     - DEBUG=1
-  #     - PUID=${PUID}
-  #     - PGID=${PGID}
-  #     - CREATE_TMPFS=no
-  #   cap_add:
-  #     - DAC_READ_SEARCH
-  #   tmpfs:
-  #     - /var/cache/unifi-video
-  #   security_opt:
-  #     - apparmor:unconfined
 
-  # openvpn-client:
-  #   image: yacht7/openvpn-client
-  #   container_name: openvpn-client
-  #   cap_add:
-  #     - NET_ADMIN
-  #   devices:
-  #     - /dev/net/tun
-  #   volumes:
-  #     - /home/josh/docker/ovpn:/data/vpn
-  #   restart: unless-stopped
-  #   environment: 
-  #     - KILL_SWITCH=on
-  #     - SUBNETS=192.168.1.0/24
-  #     - FORWARDED_PORTS=2970
-  #   ports:
-  #     - 2970:2970
-  #     - 2970:2970/udp
-  #     - 8088:8088
-  #     - 22146:22146
-  #     - 6080:6080
+  ovpn:
+    image: ghcr.io/wfg/openvpn-client
+    container_name: openvpn-client
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun
+    volumes:
+      - /home/josh/docker/ovpn:/data/vpn
+    restart: unless-stopped
+    environment: 
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - KILL_SWITCH=on
+      - SUBNETS=192.168.1.0/24
+      - FORWARDED_PORTS=2970
+    ports:
+      - 1198:1198
+      - 1198:1198/udp
+      - 8088:8088
+      - 22146:22146
+      - 6080:6080
 
-  # qbittorrent:
-  #   image: linuxserver/qbittorrent
-  #   container_name: qbittorrent
-  #   environment:
-  #     - PUID=${PUID}
-  #     - PGID=${PGID}
-  #     - TZ=${TZ}
-  #     - UMASK_SET=022
-  #     - WEBUI_PORT=8088
-  #   volumes:
-  #     - ${HOME}/docker/qBT:/config
-  #     - /mnt/downloads:/downloads
-  #   restart: unless-stopped
-  #   network_mode: service:openvpn-client
+  qbittorrent:
+    image: linuxserver/qbittorrent
+    container_name: qbittorrent
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - UMASK_SET=022
+      - WEBUI_PORT=8088
+    volumes:
+      - ${HOME}/docker/qBT:/config
+      - /mnt/downloads:/downloads
+    restart: unless-stopped
+    network_mode: service:ovpn
 
   sonarr:
     image: linuxserver/sonarr:latest
@@ -203,6 +160,9 @@ services:
       - DATABASE_NAME=teslamate
       - DATABASE_HOST=teslamate_postgres
       - MQTT_HOST=mosquitto
+      - VIRTUAL_HOST=192.168.1.6
+      - CHECK_ORIGIN=true
+      - TZ=${TZ}
     ports:
       - 4000:4000
     volumes:
