@@ -127,12 +127,12 @@ services:
     image: ghcr.io/linuxserver/tautulli
     container_name: tautulli
     environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
+      - PUID=1000
+      - PGID=1001
       - TZ=${TZ}
     volumes:
       - ${HOME}/docker/tautulli:/config
-      - /var/lib/plexmediaserver/Library/Application Support/Plex Media Server/Logs:/logs
+      - ${HOME}/docker/plexmediaserver/Library/Application Support/Plex Media Server/Logs:/logs
     ports:
       - 8181:8181
     restart: unless-stopped
