@@ -184,13 +184,14 @@ services:
 
   homeassistant:
     container_name: homeassistant
-    image: homeassistant/home-assistant:stable
+    image: ghcr.io/linuxserver/homeassistant
     volumes:
       - ${HOME}/docker/homeassistant:/config
       - /etc/localtime:/etc/localtime:ro
     environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
+      - PUID=1000
+      - PGID=1001
+      - TZ=${TZ}
     restart: unless-stopped
     network_mode: host
 
