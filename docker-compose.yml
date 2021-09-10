@@ -123,6 +123,20 @@ services:
       - 7880:7880
     restart: unless-stopped
 
+  prowlarr:
+    image: ghcr.io/linuxserver/prowlarr:develop
+    container_name: prowlarr
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - UMASK=002
+    volumes:
+      - ${HOME}/docker/prowlarr:/config
+    ports:
+      - 9696:9696
+    restart: unless-stopped
+
   tautulli:
     image: ghcr.io/linuxserver/tautulli
     container_name: tautulli
