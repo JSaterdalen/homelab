@@ -1,7 +1,7 @@
 version: "3.6"
 services:
   unifi-controller:
-    image: linuxserver/unifi-controller
+    image: ghcr.io/linuxserver/unifi-controller
     container_name: unifi-controller
     network_mode: host
     environment:
@@ -47,7 +47,7 @@ services:
       - 6080:6080
 
   qbittorrent:
-    image: linuxserver/qbittorrent
+    image: ghcr.io/linuxserver/qbittorrent
     container_name: qbittorrent
     environment:
       - PUID=${PUID}
@@ -62,7 +62,7 @@ services:
     network_mode: service:ovpn
 
   sonarr:
-    image: linuxserver/sonarr:latest
+    image: ghcr.io/linuxserver/sonarr
     container_name: sonarr
     environment:
       - PUID=${PUID}
@@ -78,7 +78,7 @@ services:
     restart: unless-stopped
 
   nzbget:
-    image: linuxserver/nzbget
+    image: ghcr.io/linuxserver/nzbget
     container_name: nzbget
     environment:
       - PUID=${PUID}
@@ -92,7 +92,7 @@ services:
     restart: unless-stopped
   
   radarr:
-    image: linuxserver/radarr
+    image: ghcr.io/linuxserver/radarr
     container_name: radarr
     environment:
       - PUID=${PUID}
@@ -108,7 +108,7 @@ services:
     restart: unless-stopped
 
   radarr4k:
-    image: linuxserver/radarr
+    image: ghcr.io/linuxserver/radarr
     container_name: radarr4k
     environment:
       - PUID=${PUID}
@@ -155,6 +155,7 @@ services:
     image: teslamate/teslamate:latest
     container_name: teslamate
     restart: always
+    user: '1000:1001'
     environment:
       - DATABASE_USER=teslamate
       - DATABASE_PASS=secret
@@ -175,6 +176,7 @@ services:
     container_name: teslamate_postgres
     image: postgres:13
     restart: always
+    user: '1000:1001'
     environment:
       - POSTGRES_USER=teslamate
       - POSTGRES_PASSWORD=secret
@@ -186,6 +188,7 @@ services:
     image: teslamate/grafana:latest
     container_name: teslamate_grafana
     restart: always
+    user: '1000:1001'
     environment:
       - DATABASE_USER=teslamate
       - DATABASE_PASS=secret
@@ -252,43 +255,46 @@ services:
       - ${VIDEO}/movies-4k:/movies-4k
     restart: unless-stopped
 
-  npm:
-    container_name: npm
-    image: 'jc21/nginx-proxy-manager:latest'
-    ports:
-      - '80:80'
-      - '81:81'
-      - '443:443'
-    environment:
-      DB_MYSQL_HOST: "mariadb"
-      DB_MYSQL_PORT: 3306
-      DB_MYSQL_USER: "npm"
-      DB_MYSQL_PASSWORD: "npm"
-      DB_MYSQL_NAME: "npm"
-    volumes:
-      - ${HOME}/docker/npm:/data
-      - ${HOME}/docker/npm/letsencrypt:/etc/letsencrypt
-  mariadb:
-    container_name: mariadb
-    image: 'jc21/mariadb-aria:latest'
-    environment:
-      MYSQL_ROOT_PASSWORD: 'npm'
-      MYSQL_DATABASE: 'npm'
-      MYSQL_USER: 'npm'
-      MYSQL_PASSWORD: 'npm'
-    volumes:
-      - ${HOME}/docker/mariadb:/var/lib/mysql
+  # npm:
+  #   container_name: npm
+  #   image: 'jc21/nginx-proxy-manager:latest'
+  #   ports:
+  #     - '80:80'
+  #     - '81:81'
+  #     - '443:443'
+  #   user: '1000:1001'
+  #   environment:
+  #     DB_MYSQL_HOST: "mariadb"
+  #     DB_MYSQL_PORT: 3306
+  #     DB_MYSQL_USER: "npm"
+  #     DB_MYSQL_PASSWORD: "npm"
+  #     DB_MYSQL_NAME: "npm"
+  #   volumes:
+  #     - ${HOME}/docker/npm:/data
+  #     - ${HOME}/docker/npm/letsencrypt:/etc/letsencrypt
+  # mariadb:
+  #   container_name: mariadb
+  #   image: 'jc21/mariadb-aria:latest'
+  #   user: '1000:1001'
+  #   environment:
+  #     MYSQL_ROOT_PASSWORD: 'npm'
+  #     MYSQL_DATABASE: 'npm'
+  #     MYSQL_USER: 'npm'
+  #     MYSQL_PASSWORD: 'npm'
+  #   volumes:
+  #     - ${HOME}/docker/mariadb:/var/lib/mysql
 
-  bitwarden:
-    image: vaultwarden/server:latest
-    container_name: bitwarden
-    restart: always
-    environment: 
-      - WEBSOCKET_ENABLED=true
-    volumes:
-      - ${HOME}/docker/bitwarden:/data
-    ports:
-      - 7070:80
+  # bitwarden:
+  #   image: vaultwarden/server:latest
+  #   container_name: bitwarden
+  #   restart: always
+  #   user: '1000:1001'
+  #   environment: 
+  #     - WEBSOCKET_ENABLED=true
+  #   volumes:
+  #     - ${HOME}/docker/bitwarden:/data
+  #   ports:
+  #     - 7070:80
 
 volumes:
   teslamate-db:
