@@ -1,6 +1,6 @@
 version: "3.6"
 services:
-  unifi-controller:
+  unifi:
     image: ghcr.io/linuxserver/unifi-controller
     container_name: unifi-controller
     network_mode: host
@@ -9,7 +9,7 @@ services:
       - PGID=${PGID}
       - MEM_LIMIT=1024M #optional
     volumes:
-      - ${USERDIR}/docker/unifi:/config
+      - ${HOME}/docker/unifi:/config
     ports:
       - 3478:3478/udp
       - 10001:10001/udp
@@ -24,7 +24,7 @@ services:
 
   ovpn:
     image: ghcr.io/wfg/openvpn-client
-    container_name: openvpn-client
+    container_name: ovpn
     cap_add:
       - NET_ADMIN
     devices:
@@ -32,10 +32,7 @@ services:
     volumes:
       - /home/josh/docker/ovpn:/data/vpn
     restart: unless-stopped
-    environment: 
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
+    environment:
       - KILL_SWITCH=on
       - SUBNETS=192.168.1.0/24
       - FORWARDED_PORTS=2970
@@ -46,9 +43,9 @@ services:
       - 22146:22146
       - 6080:6080
 
-  qbittorrent:
+  qbt:
     image: ghcr.io/linuxserver/qbittorrent
-    container_name: qbittorrent
+    container_name: qbt
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -56,8 +53,8 @@ services:
       - UMASK_SET=022
       - WEBUI_PORT=8088
     volumes:
-      - ${HOME}/docker/qBT:/config
-      - /mnt/downloads:/downloads
+      - ${HOME}/docker/qbt:/config
+      - ${MEDIA}/qb:/media/qb
     restart: unless-stopped
     network_mode: service:ovpn
 
@@ -68,11 +65,9 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
-      # - UMASK_SET=002 #optional
     volumes:
       - ${HOME}/docker/sonarr:/config
-      - ${VIDEO}:/video
-      - ${DOWNLOADS}:/downloads
+      - ${MEDIA}:/media
     ports:
       - 8989:8989
     restart: unless-stopped
@@ -86,7 +81,7 @@ services:
       - TZ=${TZ}
     volumes:
       - ${HOME}/docker/nzbget:/config
-      - ${DOWNLOADS}:/downloads
+      - ${MEDIA}/usenet:/media/usenet
     ports:
       - 9876:6789
     restart: unless-stopped
@@ -107,21 +102,21 @@ services:
       - 7878:7878
     restart: unless-stopped
 
-  radarr4k:
-    image: ghcr.io/linuxserver/radarr
-    container_name: radarr4k
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
-      # - UMASK_SET=022 #optional
-    volumes:
-      - ${HOME}/docker/radarr4k:/config
-      - ${VIDEO}:/video
-      - ${DOWNLOADS}:/downloads
-    ports:
-      - 7880:7880
-    restart: unless-stopped
+  # radarr4k:
+  #   image: ghcr.io/linuxserver/radarr
+  #   container_name: radarr4k
+  #   environment:
+  #     - PUID=${PUID}
+  #     - PGID=${PGID}
+  #     - TZ=${TZ}
+  #     # - UMASK_SET=022 #optional
+  #   volumes:
+  #     - ${HOME}/docker/radarr4k:/config
+  #     - ${VIDEO}:/video
+  #     - ${DOWNLOADS}:/downloads
+  #   ports:
+  #     - 7880:7880
+  #   restart: unless-stopped
 
   prowlarr:
     image: ghcr.io/linuxserver/prowlarr:develop
@@ -141,8 +136,8 @@ services:
     image: ghcr.io/linuxserver/tautulli
     container_name: tautulli
     environment:
-      - PUID=1000
-      - PGID=1001
+      - PUID=${PUID}
+      - PGID=${PGID}
       - TZ=${TZ}
     volumes:
       - ${HOME}/docker/tautulli:/config
@@ -155,7 +150,7 @@ services:
     image: teslamate/teslamate:latest
     container_name: teslamate
     restart: always
-    user: '1000:1001'
+    # user: '1000:65537'
     environment:
       - DATABASE_USER=teslamate
       - DATABASE_PASS=secret
@@ -176,7 +171,7 @@ services:
     container_name: teslamate_postgres
     image: postgres:13
     restart: always
-    user: '1000:1001'
+    # user: '1000:65537'
     environment:
       - POSTGRES_USER=teslamate
       - POSTGRES_PASSWORD=secret
@@ -188,7 +183,7 @@ services:
     image: teslamate/grafana:latest
     container_name: teslamate_grafana
     restart: always
-    user: '1000:1001'
+    # user: '1000:65537'
     environment:
       - DATABASE_USER=teslamate
       - DATABASE_PASS=secret
@@ -197,17 +192,16 @@ services:
     ports:
       - 3000:3000
     volumes:
-      - teslamate-grafana-data:/var/lib/grafana
+      - teslamate-grafana-new:/var/lib/grafana
 
   homeassistant:
     container_name: homeassistant
-    image: ghcr.io/linuxserver/homeassistant
+    image: ghcr.io/linuxserver/homeassistant:2021.9.5-ls36
     volumes:
       - ${HOME}/docker/homeassistant:/config
-      - /etc/localtime:/etc/localtime:ro
     environment:
       - PUID=1000
-      - PGID=1001
+      - PGID=65537
       - TZ=${TZ}
     restart: unless-stopped
     network_mode: host
@@ -217,17 +211,18 @@ services:
     network_mode: host
     restart: always
     volumes:
-      - /etc/localtime:/etc/localtime:ro
+      # - /etc/localtime:/etc/localtime:ro
       - ${HOME}/docker/deconz:/root/.local/share/dresden-elektronik/deCONZ
     devices:
       - /dev/ttyACM0
     image: marthoc/deconz
     environment:
-      - DECONZ_WEB_PORT=8484
-      - DECONZ_WS_PORT=8585
+      - DECONZ_WEB_PORT=8454
+      - DECONZ_WS_PORT=8545
       - DECONZ_DEVICE=/dev/ttyACM0
 
   mosquitto:
+    container_name: mosquitto
     image: eclipse-mosquitto:1.6
     restart: unless-stopped
     ports:
@@ -249,10 +244,7 @@ services:
       - /dev/dri:/dev/dri
     volumes:
       - ${HOME}/docker/plexmediaserver:/config
-      - ${VIDEO}/tv:/tv
-      - ${VIDEO}/movies:/movies
-      - ${MEDIA}/music:/music
-      - ${VIDEO}/movies-4k:/movies-4k
+      - ${MEDIA}/library:/media/library
     restart: unless-stopped
 
   # npm:
@@ -262,7 +254,7 @@ services:
   #     - '80:80'
   #     - '81:81'
   #     - '443:443'
-  #   user: '1000:1001'
+  #   user: '1000:65537'
   #   environment:
   #     DB_MYSQL_HOST: "mariadb"
   #     DB_MYSQL_PORT: 3306
@@ -275,7 +267,7 @@ services:
   # mariadb:
   #   container_name: mariadb
   #   image: 'jc21/mariadb-aria:latest'
-  #   user: '1000:1001'
+  #   user: '1000:65537'
   #   environment:
   #     MYSQL_ROOT_PASSWORD: 'npm'
   #     MYSQL_DATABASE: 'npm'
@@ -288,7 +280,7 @@ services:
   #   image: vaultwarden/server:latest
   #   container_name: bitwarden
   #   restart: always
-  #   user: '1000:1001'
+  #   user: '1000:65537'
   #   environment: 
   #     - WEBSOCKET_ENABLED=true
   #   volumes:
@@ -298,6 +290,6 @@ services:
 
 volumes:
   teslamate-db:
-  teslamate-grafana-data:
+  teslamate-grafana-new:
   mosquitto-conf:
   mosquitto-data:
