@@ -93,30 +93,28 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
-      # - UMASK_SET=022 #optional
+      - UMASK_SET=002 #optional
     volumes:
       - ${HOME}/docker/radarr:/config
-      - ${VIDEO}:/video
-      - ${DOWNLOADS}:/downloads
+      - ${MEDIA}:/media
     ports:
       - 7878:7878
     restart: unless-stopped
 
-  # radarr4k:
-  #   image: ghcr.io/linuxserver/radarr
-  #   container_name: radarr4k
-  #   environment:
-  #     - PUID=${PUID}
-  #     - PGID=${PGID}
-  #     - TZ=${TZ}
-  #     # - UMASK_SET=022 #optional
-  #   volumes:
-  #     - ${HOME}/docker/radarr4k:/config
-  #     - ${VIDEO}:/video
-  #     - ${DOWNLOADS}:/downloads
-  #   ports:
-  #     - 7880:7880
-  #   restart: unless-stopped
+  radarr4k:
+    image: ghcr.io/linuxserver/radarr
+    container_name: radarr4k
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - UMASK_SET=002 #optional
+    volumes:
+      - ${HOME}/docker/radarr4k:/config
+      - ${MEDIA}:/media
+    ports:
+      - 7880:7880
+    restart: unless-stopped
 
   prowlarr:
     image: ghcr.io/linuxserver/prowlarr:develop
@@ -130,6 +128,24 @@ services:
       - ${HOME}/docker/prowlarr:/config
     ports:
       - 9696:9696
+    restart: unless-stopped
+  
+  deluge:
+    image: lscr.io/linuxserver/deluge
+    container_name: deluge
+    environment:
+      - PUID=1000
+      - PGID=65537
+      - TZ=${TZ}
+      - DELUGE_LOGLEVEL=error #optional
+    volumes:
+      - ${HOME}/docker/deluge/config:/config
+      - ${MEDIA}/bt:/media/bt
+    ports:
+      - 8112:8112
+      - 6881:6881
+      - 6881:6881/udp
+    network_mode: service:ovpn
     restart: unless-stopped
 
   tautulli:
