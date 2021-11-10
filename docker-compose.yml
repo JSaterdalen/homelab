@@ -39,7 +39,8 @@ services:
     ports:
       - 1198:1198
       - 1198:1198/udp
-      - 8088:8088
+      - 8088:8088 # qBT webui
+      - 8112:8112 # deluge webui
       - 22146:22146
       - 6080:6080
 
@@ -141,10 +142,10 @@ services:
     volumes:
       - ${HOME}/docker/deluge/config:/config
       - ${MEDIA}/bt:/media/bt
-    ports:
-      - 8112:8112
-      - 6881:6881
-      - 6881:6881/udp
+    # ports:
+    #   - 8112:8112
+    #   - 6881:6881
+    #   - 6881:6881/udp
     network_mode: service:ovpn
     restart: unless-stopped
 
@@ -212,7 +213,7 @@ services:
 
   homeassistant:
     container_name: homeassistant
-    image: ghcr.io/linuxserver/homeassistant:2021.9.5-ls36
+    image: ghcr.io/linuxserver/homeassistant
     volumes:
       - ${HOME}/docker/homeassistant:/config
     environment:
