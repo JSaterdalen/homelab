@@ -55,7 +55,7 @@ services:
       - WEBUI_PORT=8088
     volumes:
       - ${HOME}/docker/qbt:/config
-      - ${MEDIA}/qb:/media/qb
+      - nfs-media/qb:/media/qb
     restart: unless-stopped
     network_mode: service:ovpn
 
@@ -68,7 +68,7 @@ services:
       - TZ=${TZ}
     volumes:
       - ${HOME}/docker/sonarr:/config
-      - ${MEDIA}:/media
+      - nfs-media:/media
     ports:
       - 8989:8989
     restart: unless-stopped
@@ -82,7 +82,7 @@ services:
       - TZ=${TZ}
     volumes:
       - ${HOME}/docker/nzbget:/config
-      - ${MEDIA}/usenet:/media/usenet
+      - nfs-media:/media
     ports:
       - 9876:6789
     restart: unless-stopped
@@ -97,7 +97,7 @@ services:
       - UMASK_SET=002 #optional
     volumes:
       - ${HOME}/docker/radarr:/config
-      - ${MEDIA}:/media
+      - nfs-media:/media
     ports:
       - 7878:7878
     restart: unless-stopped
@@ -112,7 +112,7 @@ services:
       - UMASK_SET=002 #optional
     volumes:
       - ${HOME}/docker/radarr4k:/config
-      - ${MEDIA}:/media
+      - nfs-media:/media
     ports:
       - 7880:7880
     restart: unless-stopped
@@ -141,7 +141,7 @@ services:
       - DELUGE_LOGLEVEL=error #optional
     volumes:
       - ${HOME}/docker/deluge/config:/config
-      - ${MEDIA}/bt:/media/bt
+      - nfs-media:/media
     # ports:
     #   - 8112:8112
     #   - 6881:6881
@@ -261,8 +261,19 @@ services:
       - /dev/dri:/dev/dri
     volumes:
       - ${HOME}/docker/plexmediaserver:/config
-      - ${MEDIA}/library:/media/library
+      - nfs-media:/media
     restart: unless-stopped
+
+volumes:
+  teslamate-db:
+  teslamate-grafana-new:
+  mosquitto-conf:
+  mosquitto-data:
+  nfs-media:
+    driver_opts:
+      type: nfs
+      o: addr=192.168.1.5,rw,hard,intr
+      device: :/volume1/media
 
   # npm:
   #   container_name: npm
@@ -305,8 +316,3 @@ services:
   #   ports:
   #     - 7070:80
 
-volumes:
-  teslamate-db:
-  teslamate-grafana-new:
-  mosquitto-conf:
-  mosquitto-data:
