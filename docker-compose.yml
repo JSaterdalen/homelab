@@ -130,6 +130,20 @@ services:
     ports:
       - 9696:9696
     restart: unless-stopped
+
+  bazarr:
+    container_name: bazarr
+    image: cr.hotio.dev/hotio/bazarr
+    ports:
+      - "6767:6767"
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - UMASK=002
+      - TZ=${TZ}
+    volumes:
+      - ${HOME}/docker/bazarr:/config
+      - nfs-media:/media
   
   deluge:
     image: lscr.io/linuxserver/deluge
