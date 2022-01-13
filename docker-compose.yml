@@ -44,20 +44,20 @@ services:
       - 22146:22146
       - 6080:6080
 
-  qbt:
-    image: ghcr.io/linuxserver/qbittorrent
-    container_name: qbt
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
-      - UMASK_SET=022
-      - WEBUI_PORT=8088
-    volumes:
-      - ${HOME}/docker/qbt:/config
-      - nfs-media/qb:/media/qb
-    restart: unless-stopped
-    network_mode: service:ovpn
+  # qbt:
+  #   image: ghcr.io/linuxserver/qbittorrent
+  #   container_name: qbt
+  #   environment:
+  #     - PUID=${PUID}
+  #     - PGID=${PGID}
+  #     - TZ=${TZ}
+  #     - UMASK_SET=022
+  #     - WEBUI_PORT=8088
+  #   volumes:
+  #     - ${HOME}/docker/qbt:/config
+  #     - nfs-media/qb:/media/qb
+  #   restart: unless-stopped
+  #   network_mode: service:ovpn
 
   sonarr:
     image: ghcr.io/linuxserver/sonarr
