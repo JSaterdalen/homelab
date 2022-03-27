@@ -44,6 +44,21 @@ services:
       - 22146:22146
       - 6080:6080
 
+  flame:
+    image: pawelmalak/flame
+    container_name: flame
+    volumes:
+      - ${HOME}/docker/flame:/app/data
+      - /var/run/docker.sock:/var/run/docker.sock # optional but required for Docker integration
+    ports:
+      - 5005:5005
+    secrets:
+      - password # optional but required for (1)
+    environment:
+      # - PASSWORD=flame_password
+      - PASSWORD_FILE=/run/secrets/password # optional but required for (1)
+    restart: unless-stopped
+
   sonarr:
     image: ghcr.io/linuxserver/sonarr
     container_name: sonarr
@@ -273,6 +288,10 @@ volumes:
       type: nfs
       o: addr=192.168.1.5,rw,hard,intr
       device: :/volume1/media
+  
+secrets:
+  password:
+    file: ./secrets/flame_password
 
   # npm:
   #   container_name: npm
