@@ -1,4 +1,4 @@
-version: "3.6"
+version: '3.6'
 services:
   portainer:
     image: portainer/portainer-ce:latest
@@ -145,7 +145,7 @@ services:
     container_name: bazarr
     image: cr.hotio.dev/hotio/bazarr
     ports:
-      - "6767:6767"
+      - '6767:6767'
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -293,7 +293,7 @@ services:
     privileged: false # this may not be necessary for all setups
     restart: unless-stopped
     image: blakeblackshear/frigate:stable-amd64
-    shm_size: "64mb" # update for your cameras based on calculation above
+    shm_size: '64mb' # update for your cameras based on calculation above
     # devices:
     # - /dev/bus/usb:/dev/bus/usb # passes the USB Coral, needs to be modified for other versions
     # - /dev/apex_0:/dev/apex_0 # passes a PCIe Coral, follow driver instructions here https://coral.ai/docs/m2/get-started/#2a-on-linux
@@ -308,10 +308,10 @@ services:
         tmpfs:
           size: 1000000000
     ports:
-      - "5000:5000"
-      - "1935:1935" # RTMP feeds
+      - '5000:5000'
+      - '1935:1935' # RTMP feeds
     environment:
-      FRIGATE_RTSP_PASSWORD: "password"
+      FRIGATE_RTSP_PASSWORD: 'password'
 
 volumes:
   teslamate-db:
@@ -332,6 +332,10 @@ volumes:
 secrets:
   password:
     file: ./secrets/flame_password
+
+networks:
+  reverseproxy-nw:
+    external: true
   # npm:
   #   container_name: npm
   #   image: 'jc21/nginx-proxy-manager:latest'
@@ -366,10 +370,9 @@ secrets:
   #   container_name: bitwarden
   #   restart: always
   #   user: '1000:65537'
-  #   environment: 
+  #   environment:
   #     - WEBSOCKET_ENABLED=true
   #   volumes:
   #     - ${HOME}/docker/bitwarden:/data
   #   ports:
   #     - 7070:80
-
