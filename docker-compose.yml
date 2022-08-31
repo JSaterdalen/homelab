@@ -304,6 +304,22 @@ services:
       - 8083:8083
     restart: unless-stopped
 
+  pihole:
+    container_name: pihole
+    image: pihole/pihole:latest
+    ports:
+      - '53:53/tcp'
+      - '53:53/udp'
+      - '80:80/tcp'
+    environment:
+      TZ: ${TZ}
+      WEBPASSWORD: ${PASSWORD}
+      FTLCONF_REPLY_ADDR4: 192.168.1.6
+    volumes:
+      - ${HOME}/docker/pihole/etc-pihole:/etc/pihole
+      - ${HOME}/docker/pihole/etc-dnsmasq.d:/etc/dnsmasq.d
+    restart: unless-stopped
+
 volumes:
   teslamate-db:
   teslamate-grafana-new:
