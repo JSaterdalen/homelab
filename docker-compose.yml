@@ -196,8 +196,8 @@ services:
     image: teslamate/teslamate:latest
     container_name: teslamate
     restart: always
-    # user: '1000:65537'
     environment:
+      - ENCRYPTION_KEY=${TM_KEY}
       - DATABASE_USER=teslamate
       - DATABASE_PASS=secret
       - DATABASE_NAME=teslamate
