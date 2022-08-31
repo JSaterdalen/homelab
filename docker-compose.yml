@@ -33,28 +33,6 @@ services:
       - 5514:5514 #optional
     restart: unless-stopped
 
-  ovpn:
-    image: ghcr.io/wfg/openvpn-client
-    container_name: ovpn
-    cap_add:
-      - NET_ADMIN
-    devices:
-      - /dev/net/tun
-    volumes:
-      - /home/josh/docker/ovpn:/data/vpn
-    restart: unless-stopped
-    environment:
-      - KILL_SWITCH=on
-      - SUBNETS=192.168.1.0/24
-      - FORWARDED_PORTS=2970
-    ports:
-      - 1198:1198
-      - 1198:1198/udp
-      - 8088:8088 # qBT webui
-      - 8112:8112 # deluge webui
-      - 22146:22146
-      - 6080:6080
-
   flame:
     image: pawelmalak/flame
     container_name: flame
@@ -156,23 +134,31 @@ services:
       - ${HOME}/docker/bazarr:/config
       - nfs-media:/media
 
-  deluge:
-    image: lscr.io/linuxserver/deluge
-    container_name: deluge
+  qbt:
+    container_name: qbt
+    image: cr.hotio.dev/hotio/qbittorrent
+    ports:
+      - '8202:8202'
+      - '8118:8118'
     environment:
-      - PUID=1000
-      - PGID=65537
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - UMASK=002
       - TZ=${TZ}
-      - DELUGE_LOGLEVEL=error #optional
+      - VPN_ENABLED=true
+      - VPN_LAN_NETWORK=192.168.1.0/24,10.2.1.0/24
+      - VPN_CONF=wg0
+      # - VPN_ADDITIONAL_PORTS
+      - VPN_IP_CHECK_DELAY=5
+      - PRIVOXY_ENABLED=false
+      - WEBUI_PORTS=8202/tcp,8202/udp
     volumes:
-      - ${HOME}/docker/deluge/config:/config
+      - $HOME/docker/qbt:/config
       - nfs-media:/media
-    # ports:
-    #   - 8112:8112
-    #   - 6881:6881
-    #   - 6881:6881/udp
-    network_mode: service:ovpn
-    restart: unless-stopped
+    cap_add:
+      - NET_ADMIN
+    sysctls:
+      - net.ipv4.conf.all.src_valid_mark=1
 
   tautulli:
     image: ghcr.io/linuxserver/tautulli
