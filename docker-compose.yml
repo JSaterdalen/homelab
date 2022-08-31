@@ -49,26 +49,28 @@ services:
     restart: unless-stopped
 
   sonarr:
-    image: ghcr.io/linuxserver/sonarr
     container_name: sonarr
+    image: cr.hotio.dev/hotio/sonarr
+    ports:
+      - '8989:8989'
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
+      - UMASK=002
       - TZ=${TZ}
     volumes:
       - ${HOME}/docker/sonarr:/config
       - nfs-media:/media
-    ports:
-      - 8989:8989
     restart: unless-stopped
 
   nzbget:
-    image: ghcr.io/linuxserver/nzbget
     container_name: nzbget
+    image: cr.hotio.dev/hotio/nzbget
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
+      - UMASK=002
     volumes:
       - ${HOME}/docker/nzbget:/config
       - nfs-media:/media
@@ -77,13 +79,13 @@ services:
     restart: unless-stopped
 
   radarr:
-    image: ghcr.io/linuxserver/radarr
     container_name: radarr
+    image: cr.hotio.dev/hotio/radarr
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
-      - UMASK_SET=002 #optional
+      - UMASK=002
     volumes:
       - ${HOME}/docker/radarr:/config
       - nfs-media:/media
@@ -92,13 +94,13 @@ services:
     restart: unless-stopped
 
   radarr4k:
-    image: ghcr.io/linuxserver/radarr
     container_name: radarr4k
+    image: cr.hotio.dev/hotio/radarr
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
-      - UMASK_SET=002 #optional
+      - UMASK=002
     volumes:
       - ${HOME}/docker/radarr4k:/config
       - nfs-media:/media
@@ -107,8 +109,8 @@ services:
     restart: unless-stopped
 
   prowlarr:
-    image: ghcr.io/linuxserver/prowlarr:develop
     container_name: prowlarr
+    image: cr.hotio.dev/hotio/prowlarr:testing
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -176,12 +178,13 @@ services:
       - net.ipv4.conf.all.src_valid_mark=1
 
   tautulli:
-    image: ghcr.io/linuxserver/tautulli
     container_name: tautulli
+    image: cr.hotio.dev/hotio/tautulli
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
+      - UMASK=002
     volumes:
       - ${HOME}/docker/tautulli:/config
       - ${HOME}/docker/plexmediaserver/Library/Application Support/Plex Media Server/Logs:/logs
