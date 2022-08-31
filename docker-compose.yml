@@ -134,6 +134,21 @@ services:
       - ${HOME}/docker/bazarr:/config
       - nfs-media:/media
 
+  readarr:
+    container_name: readarr
+    image: cr.hotio.dev/hotio/readarr:testing
+    ports:
+      - '8787:8787'
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - UMASK=002
+      - TZ=${TZ}
+    volumes:
+      - ${HOME}/docker/readarr:/config
+      - nfs-media:/media
+    restart: unless-stopped
+
   qbt:
     container_name: qbt
     image: cr.hotio.dev/hotio/qbittorrent
