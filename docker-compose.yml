@@ -12,6 +12,13 @@ services:
       - 9443:9443
 
   unifi:
+    labels:
+      - 'org.hotio.pullio.notify=true'
+      - 'org.hotio.pullio.update=false'
+      - 'org.hotio.pullio.discord.webhook=${DISCORD_WEBHOOK}'
+      - 'org.hotio.pullio.daily.notify=true'
+      - 'org.hotio.pullio.daily.update=true'
+      - 'org.hotio.pullio.daily.discord.webhook=${DISCORD_WEBHOOK}'
     image: ghcr.io/linuxserver/unifi-controller
     container_name: unifi-controller
     network_mode: host
@@ -49,6 +56,15 @@ services:
     restart: unless-stopped
 
   sonarr:
+    labels:
+      - 'org.hotio.pullio.notify=true'
+      - 'org.hotio.pullio.update=false'
+      - 'org.hotio.pullio.discord.webhook=${DISCORD_WEBHOOK}'
+      - 'org.hotio.pullio.author.avatar=https://hotio.dev/webhook-avatars/sonarr.png'
+      - 'org.hotio.pullio.daily.notify=true'
+      - 'org.hotio.pullio.daily.update=true'
+      - 'org.hotio.pullio.daily.discord.webhook=${DISCORD_WEBHOOK}'
+      - 'org.hotio.pullio.daily.author.avatar=https://hotio.dev/webhook-avatars/sonarr.png'
     container_name: sonarr
     image: cr.hotio.dev/hotio/sonarr
     ports:
@@ -64,6 +80,15 @@ services:
     restart: unless-stopped
 
   nzbget:
+    labels:
+      - 'org.hotio.pullio.notify=true'
+      - 'org.hotio.pullio.update=false'
+      - 'org.hotio.pullio.discord.webhook=${DISCORD_WEBHOOK}'
+      - 'org.hotio.pullio.author.avatar=https://hotio.dev/webhook-avatars/nzbget.png'
+      - 'org.hotio.pullio.daily.notify=true'
+      - 'org.hotio.pullio.daily.update=true'
+      - 'org.hotio.pullio.daily.discord.webhook=${DISCORD_WEBHOOK}'
+      - 'org.hotio.pullio.daily.author.avatar=https://hotio.dev/webhook-avatars/nzbget.png'
     container_name: nzbget
     image: cr.hotio.dev/hotio/nzbget
     environment:
@@ -79,6 +104,15 @@ services:
     restart: unless-stopped
 
   radarr:
+    labels:
+      - 'org.hotio.pullio.notify=true'
+      - 'org.hotio.pullio.update=false'
+      - 'org.hotio.pullio.discord.webhook=${DISCORD_WEBHOOK}'
+      - 'org.hotio.pullio.author.avatar=https://hotio.dev/webhook-avatars/radarr.png'
+      - 'org.hotio.pullio.daily.notify=true'
+      - 'org.hotio.pullio.daily.update=true'
+      - 'org.hotio.pullio.daily.discord.webhook=${DISCORD_WEBHOOK}'
+      - 'org.hotio.pullio.daily.author.avatar=https://hotio.dev/webhook-avatars/radarr.png'
     container_name: radarr
     image: cr.hotio.dev/hotio/radarr
     environment:
@@ -94,6 +128,8 @@ services:
     restart: unless-stopped
 
   radarr4k:
+    labels:
+      - 'org.hotio.pullio.daily.update=true'
     container_name: radarr4k
     image: cr.hotio.dev/hotio/radarr
     environment:
@@ -109,6 +145,15 @@ services:
     restart: unless-stopped
 
   prowlarr:
+    labels:
+      - 'org.hotio.pullio.notify=true'
+      - 'org.hotio.pullio.update=false'
+      - 'org.hotio.pullio.discord.webhook=${DISCORD_WEBHOOK}'
+      - 'org.hotio.pullio.author.avatar=https://hotio.dev/webhook-avatars/prowlarr.png'
+      - 'org.hotio.pullio.daily.notify=true'
+      - 'org.hotio.pullio.daily.update=true'
+      - 'org.hotio.pullio.daily.discord.webhook=${DISCORD_WEBHOOK}'
+      - 'org.hotio.pullio.daily.author.avatar=https://hotio.dev/webhook-avatars/prowlarr.png'
     container_name: prowlarr
     image: cr.hotio.dev/hotio/prowlarr:testing
     environment:
@@ -123,6 +168,15 @@ services:
     restart: unless-stopped
 
   bazarr:
+    labels:
+      - 'org.hotio.pullio.notify=true'
+      - 'org.hotio.pullio.update=false'
+      - 'org.hotio.pullio.discord.webhook=${DISCORD_WEBHOOK}'
+      - 'org.hotio.pullio.author.avatar=https://hotio.dev/webhook-avatars/bazarr.png'
+      - 'org.hotio.pullio.daily.notify=true'
+      - 'org.hotio.pullio.daily.update=true'
+      - 'org.hotio.pullio.daily.discord.webhook=${DISCORD_WEBHOOK}'
+      - 'org.hotio.pullio.daily.author.avatar=https://hotio.dev/webhook-avatars/bazarr.png'
     container_name: bazarr
     image: cr.hotio.dev/hotio/bazarr
     ports:
@@ -137,6 +191,15 @@ services:
       - nfs-media:/media
 
   readarr:
+    labels:
+      - 'org.hotio.pullio.notify=true'
+      - 'org.hotio.pullio.update=false'
+      - 'org.hotio.pullio.discord.webhook=${DISCORD_WEBHOOK}'
+      - 'org.hotio.pullio.author.avatar=https://hotio.dev/webhook-avatars/readarr.png'
+      - 'org.hotio.pullio.daily.notify=true'
+      - 'org.hotio.pullio.daily.update=true'
+      - 'org.hotio.pullio.daily.discord.webhook=${DISCORD_WEBHOOK}'
+      - 'org.hotio.pullio.daily.author.avatar=https://hotio.dev/webhook-avatars/readarr.png'
     container_name: readarr
     image: cr.hotio.dev/hotio/readarr:testing
     ports:
@@ -152,6 +215,15 @@ services:
     restart: unless-stopped
 
   qbt:
+    labels:
+      - 'org.hotio.pullio.notify=true'
+      - 'org.hotio.pullio.update=false'
+      - 'org.hotio.pullio.discord.webhook=${DISCORD_WEBHOOK}'
+      - 'org.hotio.pullio.author.avatar=https://hotio.dev/webhook-avatars/qbittorrent.png'
+      - 'org.hotio.pullio.daily.notify=true'
+      - 'org.hotio.pullio.daily.update=true'
+      - 'org.hotio.pullio.daily.discord.webhook=${DISCORD_WEBHOOK}'
+      - 'org.hotio.pullio.daily.author.avatar=https://hotio.dev/webhook-avatars/qbittorrent.png'
     container_name: qbt
     image: cr.hotio.dev/hotio/qbittorrent
     ports:
@@ -178,6 +250,15 @@ services:
       - net.ipv4.conf.all.src_valid_mark=1
 
   tautulli:
+    labels:
+      - 'org.hotio.pullio.notify=true'
+      - 'org.hotio.pullio.update=false'
+      - 'org.hotio.pullio.discord.webhook=${DISCORD_WEBHOOK}'
+      - 'org.hotio.pullio.author.avatar=https://hotio.dev/webhook-avatars/tautulli.png'
+      - 'org.hotio.pullio.daily.notify=true'
+      - 'org.hotio.pullio.daily.update=true'
+      - 'org.hotio.pullio.daily.discord.webhook=${DISCORD_WEBHOOK}'
+      - 'org.hotio.pullio.daily.author.avatar=https://hotio.dev/webhook-avatars/tautulli.png'
     container_name: tautulli
     image: cr.hotio.dev/hotio/tautulli
     environment:
@@ -193,6 +274,13 @@ services:
     restart: unless-stopped
 
   teslamate:
+    labels:
+      - 'org.hotio.pullio.notify=true'
+      - 'org.hotio.pullio.update=false'
+      - 'org.hotio.pullio.discord.webhook=${DISCORD_WEBHOOK}'
+      - 'org.hotio.pullio.daily.notify=true'
+      - 'org.hotio.pullio.daily.update=true'
+      - 'org.hotio.pullio.daily.discord.webhook=${DISCORD_WEBHOOK}'
     image: teslamate/teslamate:latest
     container_name: teslamate
     restart: always
@@ -214,6 +302,13 @@ services:
       - all
 
   teslamate_postgres:
+    labels:
+      - 'org.hotio.pullio.notify=true'
+      - 'org.hotio.pullio.update=false'
+      - 'org.hotio.pullio.discord.webhook=${DISCORD_WEBHOOK}'
+      - 'org.hotio.pullio.daily.notify=true'
+      - 'org.hotio.pullio.daily.update=true'
+      - 'org.hotio.pullio.daily.discord.webhook=${DISCORD_WEBHOOK}'
     container_name: teslamate_postgres
     image: postgres:13
     restart: always
@@ -226,6 +321,13 @@ services:
       - teslamate-db:/var/lib/postgresql/data
 
   teslamate_grafana:
+    labels:
+      - 'org.hotio.pullio.notify=true'
+      - 'org.hotio.pullio.update=false'
+      - 'org.hotio.pullio.discord.webhook=${DISCORD_WEBHOOK}'
+      - 'org.hotio.pullio.daily.notify=true'
+      - 'org.hotio.pullio.daily.update=true'
+      - 'org.hotio.pullio.daily.discord.webhook=${DISCORD_WEBHOOK}'
     image: teslamate/grafana:latest
     container_name: teslamate_grafana
     restart: always
@@ -241,6 +343,10 @@ services:
       - teslamate-grafana-new:/var/lib/grafana
 
   homeassistant:
+    labels:
+      - 'org.hotio.pullio.notify=true'
+      - 'org.hotio.pullio.update=false'
+      - 'org.hotio.pullio.discord.webhook=${DISCORD_WEBHOOK}'
     container_name: homeassistant
     image: ghcr.io/linuxserver/homeassistant
     volumes:
@@ -253,6 +359,13 @@ services:
     network_mode: host
 
   deconz:
+    labels:
+      - 'org.hotio.pullio.notify=true'
+      - 'org.hotio.pullio.update=false'
+      - 'org.hotio.pullio.discord.webhook=${DISCORD_WEBHOOK}'
+      - 'org.hotio.pullio.daily.notify=true'
+      - 'org.hotio.pullio.daily.update=true'
+      - 'org.hotio.pullio.daily.discord.webhook=${DISCORD_WEBHOOK}'
     container_name: deconz
     network_mode: host
     restart: always
@@ -268,6 +381,13 @@ services:
       - DECONZ_DEVICE=/dev/ttyACM0
 
   mosquitto:
+    labels:
+      - 'org.hotio.pullio.notify=true'
+      - 'org.hotio.pullio.update=false'
+      - 'org.hotio.pullio.discord.webhook=${DISCORD_WEBHOOK}'
+      - 'org.hotio.pullio.daily.notify=true'
+      - 'org.hotio.pullio.daily.update=true'
+      - 'org.hotio.pullio.daily.discord.webhook=${DISCORD_WEBHOOK}'
     container_name: mosquitto
     image: eclipse-mosquitto:1.6
     restart: unless-stopped
@@ -278,6 +398,15 @@ services:
       - mosquitto-data:/mosquitto/data
 
   plex:
+    labels:
+      - 'org.hotio.pullio.notify=true'
+      - 'org.hotio.pullio.update=false'
+      - 'org.hotio.pullio.discord.webhook=${DISCORD_WEBHOOK}'
+      - 'org.hotio.pullio.author.avatar=https://hotio.dev/webhook-avatars/plex.png'
+      - 'org.hotio.pullio.daily.notify=true'
+      - 'org.hotio.pullio.daily.update=true'
+      - 'org.hotio.pullio.daily.discord.webhook=${DISCORD_WEBHOOK}'
+      - 'org.hotio.pullio.daily.author.avatar=https://hotio.dev/webhook-avatars/plex.png'
     image: ghcr.io/linuxserver/plex
     container_name: plex
     network_mode: host
@@ -294,6 +423,13 @@ services:
     restart: unless-stopped
 
   calibre-web:
+    labels:
+      - 'org.hotio.pullio.notify=true'
+      - 'org.hotio.pullio.update=false'
+      - 'org.hotio.pullio.discord.webhook=${DISCORD_WEBHOOK}'
+      - 'org.hotio.pullio.daily.notify=true'
+      - 'org.hotio.pullio.daily.update=true'
+      - 'org.hotio.pullio.daily.discord.webhook=${DISCORD_WEBHOOK}'
     image: lscr.io/linuxserver/calibre-web:latest
     container_name: calibre-web
     environment:
@@ -309,6 +445,13 @@ services:
     restart: unless-stopped
 
   pihole:
+    labels:
+      - 'org.hotio.pullio.notify=true'
+      - 'org.hotio.pullio.update=false'
+      - 'org.hotio.pullio.discord.webhook=${DISCORD_WEBHOOK}'
+      - 'org.hotio.pullio.daily.notify=true'
+      - 'org.hotio.pullio.daily.update=true'
+      - 'org.hotio.pullio.daily.discord.webhook=${DISCORD_WEBHOOK}'
     container_name: pihole
     image: pihole/pihole:latest
     ports:
