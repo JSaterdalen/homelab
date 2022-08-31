@@ -289,6 +289,21 @@ services:
       - nfs-media:/media
     restart: unless-stopped
 
+  calibre-web:
+    image: lscr.io/linuxserver/calibre-web:latest
+    container_name: calibre-web
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - DOCKER_MODS=linuxserver/mods:universal-calibre
+    volumes:
+      - ${HOME}/docker/calibre-web:/config
+      - /mnt/media/library/books:/books
+    ports:
+      - 8083:8083
+    restart: unless-stopped
+
 volumes:
   teslamate-db:
   teslamate-grafana-new:
@@ -299,6 +314,11 @@ volumes:
       type: nfs
       o: addr=192.168.1.5,rw,hard,intr
       device: :/volume1/media
+  rey-books:
+    driver_opts:
+      type: nfs
+      o: addr=192.168.1.5,rw,hard,intr
+      device: :/volume1/media/library/books
 
 secrets:
   password:
