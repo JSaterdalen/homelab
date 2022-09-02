@@ -232,6 +232,19 @@ services:
       - nfs-media:/media
     restart: unless-stopped
 
+  overseerr:
+    container_name: overseerr
+    image: cr.hotio.dev/hotio/overseerr
+    ports:
+      - '5055:5055'
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - UMASK=002
+      - TZ=${TZ}
+    volumes:
+      - ${HOME}/docker/overseerr:/config
+
   qbt:
     labels:
       - 'org.hotio.pullio.notify=true'
