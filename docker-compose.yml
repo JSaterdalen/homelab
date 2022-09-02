@@ -11,6 +11,24 @@ services:
     ports:
       - 9443:9443
 
+  caddy:
+    container_name: caddy
+    image: cr.hotio.dev/hotio/caddy
+    ports:
+      - '80:8080'
+      - '443:8443'
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - UMASK=002
+      - MY_DOMAIN
+    volumes:
+      - ${HOME}/docker/caddy:/config
+      # - ${HOME}/docker/caddy/Caddyfile:/etc/caddy/Caddyfile
+    cap_add:
+      - NET_ADMIN
+
   unifi:
     labels:
       - 'org.hotio.pullio.notify=true'
@@ -482,6 +500,11 @@ volumes:
       type: nfs
       o: addr=192.168.1.5,rw,hard,intr
       device: :/volume1/media/library/books
+
+networks:
+  default:
+    name: $DOCKER_NETWORK
+    external: true
 
 secrets:
   password:
