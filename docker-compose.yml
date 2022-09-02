@@ -472,10 +472,11 @@ services:
       - 'org.hotio.pullio.daily.discord.webhook=${DISCORD_WEBHOOK}'
     container_name: pihole
     image: pihole/pihole:latest
+    hostname: pihole
     ports:
       - '53:53/tcp'
       - '53:53/udp'
-      - '80:80/tcp'
+      - '8127:80/tcp'
     environment:
       TZ: ${TZ}
       WEBPASSWORD: ${PASSWORD}
