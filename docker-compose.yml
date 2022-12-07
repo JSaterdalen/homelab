@@ -323,13 +323,12 @@ services:
     environment:
       - ENCRYPTION_KEY=${TM_KEY}
       - DATABASE_USER=teslamate
-      - DATABASE_PASS=secret
+      - DATABASE_PASS=${DB_PASS}
       - DATABASE_NAME=teslamate
       - DATABASE_HOST=teslamate_postgres
       - MQTT_HOST=mosquitto
-      - VIRTUAL_HOST=192.168.1.6
-      - CHECK_ORIGIN=true
-      - TZ=${TZ}
+      # - VIRTUAL_HOST=192.168.1.6
+      # - CHECK_ORIGIN=true
     ports:
       - 4000:4000
     volumes:
@@ -346,12 +345,12 @@ services:
       - 'org.hotio.pullio.daily.update=true'
       - 'org.hotio.pullio.daily.discord.webhook=${DISCORD_WEBHOOK}'
     container_name: teslamate_postgres
-    image: postgres:13
+    image: postgres:14
     restart: always
     # user: '1000:65537'
     environment:
       - POSTGRES_USER=teslamate
-      - POSTGRES_PASSWORD=secret
+      - POSTGRES_PASSWORD=${DB_PASS}
       - POSTGRES_DB=teslamate
     volumes:
       - teslamate-db:/var/lib/postgresql/data
@@ -367,16 +366,15 @@ services:
     image: teslamate/grafana:latest
     container_name: teslamate_grafana
     restart: always
-    # user: '1000:65537'
     environment:
       - DATABASE_USER=teslamate
-      - DATABASE_PASS=secret
+      - DATABASE_PASS=${DB_PASS}
       - DATABASE_NAME=teslamate
       - DATABASE_HOST=teslamate_postgres
     ports:
       - 3000:3000
     volumes:
-      - teslamate-grafana-new:/var/lib/grafana
+      - teslamate-grafana-data:/var/lib/grafana
 
   homeassistant:
     labels:
@@ -506,7 +504,7 @@ services:
 
 volumes:
   teslamate-db:
-  teslamate-grafana-new:
+  teslamate-grafana-data:
   mosquitto-conf:
   mosquitto-data:
   nfs-media:
