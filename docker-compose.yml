@@ -28,6 +28,7 @@ services:
       # - ${HOME}/docker/caddy/Caddyfile:/etc/caddy/Caddyfile
     cap_add:
       - NET_ADMIN
+    restart: unless-stopped
 
   unifi:
     labels:
@@ -85,6 +86,7 @@ services:
       - 'org.hotio.pullio.daily.author.avatar=https://hotio.dev/webhook-avatars/sonarr.png'
     container_name: sonarr
     image: cr.hotio.dev/hotio/sonarr
+    hostname: sonarr
     ports:
       - '8989:8989'
     environment:
@@ -109,6 +111,7 @@ services:
       - 'org.hotio.pullio.daily.author.avatar=https://hotio.dev/webhook-avatars/nzbget.png'
     container_name: nzbget
     image: cr.hotio.dev/hotio/nzbget
+    hostname: nzbget
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -244,6 +247,7 @@ services:
       - TZ=${TZ}
     volumes:
       - ${HOME}/docker/overseerr:/config
+    restart: unless-stopped
 
   qbt:
     labels:
@@ -279,6 +283,7 @@ services:
       - NET_ADMIN
     sysctls:
       - net.ipv4.conf.all.src_valid_mark=1
+    restart: unless-stopped
 
   tautulli:
     labels:
