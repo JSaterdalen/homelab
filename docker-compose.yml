@@ -423,8 +423,9 @@ services:
       - 'org.hotio.pullio.daily.update=true'
       - 'org.hotio.pullio.daily.discord.webhook=${DISCORD_WEBHOOK}'
     container_name: mosquitto
-    image: eclipse-mosquitto:1.6
-    restart: unless-stopped
+    command: mosquitto -c /mosquitto-no-auth.conf
+    image: eclipse-mosquitto:2
+    restart: always
     ports:
       - 1883:1883
     volumes:
