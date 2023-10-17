@@ -1,559 +1,495 @@
 version: '3.8'
 services:
-  portainer:
-    image: portainer/portainer-ce:latest
-    container_name: portainer
-    restart: always
-    privileged: true
-    volumes:
-      - /mnt/containers/portainer/container-data/data:/data:Z
-      - /var/run/docker.sock:/var/run/docker.sock:Z
-    ports:
-      - 9443:9443
+    cloudflare-ddns:
+        image: oznu/cloudflare-ddns:latest
+        restart: always
+        environment:
+            - API_KEY=${CF_DDNS_API}
+            - ZONE=satrday.io
+            - SUBDOMAIN=home
+            - PROXIED=false
+    portainer:
+        image: portainer/portainer-ce:latest
+        container_name: portainer
+        restart: always
+        privileged: true
+        volumes:
+            - /mnt/containers/portainer/container-data/data:/data:Z
+            - /var/run/docker.sock:/var/run/docker.sock:Z
+        ports:
+            - 9443:9443
 
-  caddy:
-    container_name: caddy
-    image: cr.hotio.dev/hotio/caddy
-    ports:
-      - '80:8080'
-      - '443:8443'
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
-      - UMASK=002
-      - MY_DOMAIN
-    volumes:
-      - ${HOME}/docker/caddy:/config
-      # - ${HOME}/docker/caddy/Caddyfile:/etc/caddy/Caddyfile
-    cap_add:
-      - NET_ADMIN
-    restart: unless-stopped
+    caddy:
+        container_name: caddy
+        image: cr.hotio.dev/hotio/caddy
+        ports:
+            - '80:8080'
+            - '443:8443'
+        environment:
+            - PUID=${PUID}
+            - PGID=${PGID}
+            - TZ=${TZ}
+            - UMASK=002
+            - MY_DOMAIN
+        volumes:
+            - ${HOME}/docker/caddy:/config
+            # - ${HOME}/docker/caddy/Caddyfile:/etc/caddy/Caddyfile
+        cap_add:
+            - NET_ADMIN
+        restart: unless-stopped
 
-  unifi:
-    labels:
-      - 'org.hotio.pullio.notify=true'
-      - 'org.hotio.pullio.update=false'
-      - 'org.hotio.pullio.discord.webhook=${DISCORD_WEBHOOK}'
-      - 'org.hotio.pullio.daily.notify=true'
-      - 'org.hotio.pullio.daily.update=true'
-      - 'org.hotio.pullio.daily.discord.webhook=${DISCORD_WEBHOOK}'
-    image: ghcr.io/linuxserver/unifi-controller
-    container_name: unifi-controller
-    network_mode: host
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - MEM_LIMIT=1024 #optional
-    volumes:
-      - ${HOME}/docker/unifi:/config
-    ports:
-      - 3478:3478/udp
-      - 10001:10001/udp
-      - 8080:8080
-      - 8443:8443
-      - 1900:1900/udp #optional
-      - 8843:8843 #optional
-      - 8880:8880 #optional
-      - 6789:6789 #optional
-      - 5514:5514 #optional
-    restart: unless-stopped
+    sonarr:
+        labels:
+            - 'org.hotio.pullio.notify=true'
+            - 'org.hotio.pullio.update=false'
+            - 'org.hotio.pullio.discord.webhook=${DISCORD_WEBHOOK}'
+            - 'org.hotio.pullio.author.avatar=https://hotio.dev/webhook-avatars/sonarr.png'
+            - 'org.hotio.pullio.daily.notify=true'
+            - 'org.hotio.pullio.daily.update=true'
+            - 'org.hotio.pullio.daily.discord.webhook=${DISCORD_WEBHOOK}'
+            - 'org.hotio.pullio.daily.author.avatar=https://hotio.dev/webhook-avatars/sonarr.png'
+        container_name: sonarr
+        image: cr.hotio.dev/hotio/sonarr
+        hostname: sonarr
+        ports:
+            - '8989:8989'
+        environment:
+            - PUID=${PUID}
+            - PGID=${PGID}
+            - UMASK=002
+            - TZ=${TZ}
+        volumes:
+            - ${HOME}/docker/sonarr:/config
+            - nfs-media:/media
+        restart: unless-stopped
 
-  flame:
-    image: pawelmalak/flame
-    container_name: flame
-    volumes:
-      - ${HOME}/docker/flame:/app/data
-      - /var/run/docker.sock:/var/run/docker.sock # optional but required for Docker integration
-    ports:
-      - 5005:5005
-    secrets:
-      - password # optional but required for (1)
-    environment:
-      # - PASSWORD=flame_password
-      - PASSWORD_FILE=/run/secrets/password # optional but required for (1)
-    restart: unless-stopped
+    nzbget:
+        container_name: nzbget
+        image: cr.hotio.dev/hotio/nzbget
+        hostname: nzbget
+        environment:
+            - PUID=${PUID}
+            - PGID=${PGID}
+            - TZ=${TZ}
+            - UMASK=002
+        volumes:
+            - ${HOME}/docker/nzbget:/config
+            - nfs-media:/media
+        ports:
+            - 9876:6789
+        restart: unless-stopped
 
-  sonarr:
-    labels:
-      - 'org.hotio.pullio.notify=true'
-      - 'org.hotio.pullio.update=false'
-      - 'org.hotio.pullio.discord.webhook=${DISCORD_WEBHOOK}'
-      - 'org.hotio.pullio.author.avatar=https://hotio.dev/webhook-avatars/sonarr.png'
-      - 'org.hotio.pullio.daily.notify=true'
-      - 'org.hotio.pullio.daily.update=true'
-      - 'org.hotio.pullio.daily.discord.webhook=${DISCORD_WEBHOOK}'
-      - 'org.hotio.pullio.daily.author.avatar=https://hotio.dev/webhook-avatars/sonarr.png'
-    container_name: sonarr
-    image: cr.hotio.dev/hotio/sonarr
-    hostname: sonarr
-    ports:
-      - '8989:8989'
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - UMASK=002
-      - TZ=${TZ}
-    volumes:
-      - ${HOME}/docker/sonarr:/config
-      - nfs-media:/media
-    restart: unless-stopped
+    radarr:
+        labels:
+            - 'org.hotio.pullio.notify=true'
+            - 'org.hotio.pullio.update=false'
+            - 'org.hotio.pullio.discord.webhook=${DISCORD_WEBHOOK}'
+            - 'org.hotio.pullio.author.avatar=https://hotio.dev/webhook-avatars/radarr.png'
+            - 'org.hotio.pullio.daily.notify=true'
+            - 'org.hotio.pullio.daily.update=true'
+            - 'org.hotio.pullio.daily.discord.webhook=${DISCORD_WEBHOOK}'
+            - 'org.hotio.pullio.daily.author.avatar=https://hotio.dev/webhook-avatars/radarr.png'
+        container_name: radarr
+        image: cr.hotio.dev/hotio/radarr
+        environment:
+            - PUID=${PUID}
+            - PGID=${PGID}
+            - TZ=${TZ}
+            - UMASK=002
+        volumes:
+            - ${HOME}/docker/radarr:/config
+            - nfs-media:/media
+        ports:
+            - 7878:7878
+        restart: unless-stopped
 
-  nzbget:
-    labels:
-      - 'org.hotio.pullio.notify=true'
-      - 'org.hotio.pullio.update=false'
-      - 'org.hotio.pullio.discord.webhook=${DISCORD_WEBHOOK}'
-      - 'org.hotio.pullio.author.avatar=https://hotio.dev/webhook-avatars/nzbget.png'
-      - 'org.hotio.pullio.daily.notify=true'
-      - 'org.hotio.pullio.daily.update=true'
-      - 'org.hotio.pullio.daily.discord.webhook=${DISCORD_WEBHOOK}'
-      - 'org.hotio.pullio.daily.author.avatar=https://hotio.dev/webhook-avatars/nzbget.png'
-    container_name: nzbget
-    image: cr.hotio.dev/hotio/nzbget
-    hostname: nzbget
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
-      - UMASK=002
-    volumes:
-      - ${HOME}/docker/nzbget:/config
-      - nfs-media:/media
-    ports:
-      - 9876:6789
-    restart: unless-stopped
+    radarr4k:
+        labels:
+            - 'org.hotio.pullio.daily.update=true'
+        container_name: radarr4k
+        image: cr.hotio.dev/hotio/radarr
+        environment:
+            - PUID=${PUID}
+            - PGID=${PGID}
+            - TZ=${TZ}
+            - UMASK=002
+        volumes:
+            - ${HOME}/docker/radarr4k:/config
+            - nfs-media:/media
+        ports:
+            - 7880:7878
+        restart: unless-stopped
 
-  radarr:
-    labels:
-      - 'org.hotio.pullio.notify=true'
-      - 'org.hotio.pullio.update=false'
-      - 'org.hotio.pullio.discord.webhook=${DISCORD_WEBHOOK}'
-      - 'org.hotio.pullio.author.avatar=https://hotio.dev/webhook-avatars/radarr.png'
-      - 'org.hotio.pullio.daily.notify=true'
-      - 'org.hotio.pullio.daily.update=true'
-      - 'org.hotio.pullio.daily.discord.webhook=${DISCORD_WEBHOOK}'
-      - 'org.hotio.pullio.daily.author.avatar=https://hotio.dev/webhook-avatars/radarr.png'
-    container_name: radarr
-    image: cr.hotio.dev/hotio/radarr
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
-      - UMASK=002
-    volumes:
-      - ${HOME}/docker/radarr:/config
-      - nfs-media:/media
-    ports:
-      - 7878:7878
-    restart: unless-stopped
+    prowlarr:
+        labels:
+            - 'org.hotio.pullio.notify=true'
+            - 'org.hotio.pullio.update=false'
+            - 'org.hotio.pullio.discord.webhook=${DISCORD_WEBHOOK}'
+            - 'org.hotio.pullio.author.avatar=https://hotio.dev/webhook-avatars/prowlarr.png'
+            - 'org.hotio.pullio.daily.notify=true'
+            - 'org.hotio.pullio.daily.update=true'
+            - 'org.hotio.pullio.daily.discord.webhook=${DISCORD_WEBHOOK}'
+            - 'org.hotio.pullio.daily.author.avatar=https://hotio.dev/webhook-avatars/prowlarr.png'
+        container_name: prowlarr
+        image: cr.hotio.dev/hotio/prowlarr:testing
+        environment:
+            - PUID=${PUID}
+            - PGID=${PGID}
+            - TZ=${TZ}
+            - UMASK=002
+        volumes:
+            - ${HOME}/docker/prowlarr:/config
+        ports:
+            - 9696:9696
+        restart: unless-stopped
 
-  radarr4k:
-    labels:
-      - 'org.hotio.pullio.daily.update=true'
-    container_name: radarr4k
-    image: cr.hotio.dev/hotio/radarr
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
-      - UMASK=002
-    volumes:
-      - ${HOME}/docker/radarr4k:/config
-      - nfs-media:/media
-    ports:
-      - 7880:7878
-    restart: unless-stopped
+    bazarr:
+        labels:
+            - 'org.hotio.pullio.notify=true'
+            - 'org.hotio.pullio.update=false'
+            - 'org.hotio.pullio.discord.webhook=${DISCORD_WEBHOOK}'
+            - 'org.hotio.pullio.author.avatar=https://hotio.dev/webhook-avatars/bazarr.png'
+            - 'org.hotio.pullio.daily.notify=true'
+            - 'org.hotio.pullio.daily.update=true'
+            - 'org.hotio.pullio.daily.discord.webhook=${DISCORD_WEBHOOK}'
+            - 'org.hotio.pullio.daily.author.avatar=https://hotio.dev/webhook-avatars/bazarr.png'
+        container_name: bazarr
+        image: cr.hotio.dev/hotio/bazarr
+        ports:
+            - '6767:6767'
+        environment:
+            - PUID=${PUID}
+            - PGID=${PGID}
+            - UMASK=002
+            - TZ=${TZ}
+        volumes:
+            - ${HOME}/docker/bazarr:/config
+            - nfs-media:/media
 
-  prowlarr:
-    labels:
-      - 'org.hotio.pullio.notify=true'
-      - 'org.hotio.pullio.update=false'
-      - 'org.hotio.pullio.discord.webhook=${DISCORD_WEBHOOK}'
-      - 'org.hotio.pullio.author.avatar=https://hotio.dev/webhook-avatars/prowlarr.png'
-      - 'org.hotio.pullio.daily.notify=true'
-      - 'org.hotio.pullio.daily.update=true'
-      - 'org.hotio.pullio.daily.discord.webhook=${DISCORD_WEBHOOK}'
-      - 'org.hotio.pullio.daily.author.avatar=https://hotio.dev/webhook-avatars/prowlarr.png'
-    container_name: prowlarr
-    image: cr.hotio.dev/hotio/prowlarr:testing
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
-      - UMASK=002
-    volumes:
-      - ${HOME}/docker/prowlarr:/config
-    ports:
-      - 9696:9696
-    restart: unless-stopped
+    readarr:
+        labels:
+            - 'org.hotio.pullio.notify=true'
+            - 'org.hotio.pullio.update=false'
+            - 'org.hotio.pullio.discord.webhook=${DISCORD_WEBHOOK}'
+            - 'org.hotio.pullio.author.avatar=https://hotio.dev/webhook-avatars/readarr.png'
+            - 'org.hotio.pullio.daily.notify=true'
+            - 'org.hotio.pullio.daily.update=true'
+            - 'org.hotio.pullio.daily.discord.webhook=${DISCORD_WEBHOOK}'
+            - 'org.hotio.pullio.daily.author.avatar=https://hotio.dev/webhook-avatars/readarr.png'
+        container_name: readarr
+        image: cr.hotio.dev/hotio/readarr:testing
+        ports:
+            - '8787:8787'
+        environment:
+            - PUID=${PUID}
+            - PGID=${PGID}
+            - UMASK=002
+            - TZ=${TZ}
+        volumes:
+            - ${HOME}/docker/readarr:/config
+            - nfs-media:/media
+        restart: unless-stopped
 
-  bazarr:
-    labels:
-      - 'org.hotio.pullio.notify=true'
-      - 'org.hotio.pullio.update=false'
-      - 'org.hotio.pullio.discord.webhook=${DISCORD_WEBHOOK}'
-      - 'org.hotio.pullio.author.avatar=https://hotio.dev/webhook-avatars/bazarr.png'
-      - 'org.hotio.pullio.daily.notify=true'
-      - 'org.hotio.pullio.daily.update=true'
-      - 'org.hotio.pullio.daily.discord.webhook=${DISCORD_WEBHOOK}'
-      - 'org.hotio.pullio.daily.author.avatar=https://hotio.dev/webhook-avatars/bazarr.png'
-    container_name: bazarr
-    image: cr.hotio.dev/hotio/bazarr
-    ports:
-      - '6767:6767'
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - UMASK=002
-      - TZ=${TZ}
-    volumes:
-      - ${HOME}/docker/bazarr:/config
-      - nfs-media:/media
+    overseerr:
+        container_name: overseerr
+        image: cr.hotio.dev/hotio/overseerr
+        ports:
+            - '5055:5055'
+        environment:
+            - PUID=${PUID}
+            - PGID=${PGID}
+            - UMASK=002
+            - TZ=${TZ}
+        volumes:
+            - ${HOME}/docker/overseerr:/config
+        restart: unless-stopped
 
-  readarr:
-    labels:
-      - 'org.hotio.pullio.notify=true'
-      - 'org.hotio.pullio.update=false'
-      - 'org.hotio.pullio.discord.webhook=${DISCORD_WEBHOOK}'
-      - 'org.hotio.pullio.author.avatar=https://hotio.dev/webhook-avatars/readarr.png'
-      - 'org.hotio.pullio.daily.notify=true'
-      - 'org.hotio.pullio.daily.update=true'
-      - 'org.hotio.pullio.daily.discord.webhook=${DISCORD_WEBHOOK}'
-      - 'org.hotio.pullio.daily.author.avatar=https://hotio.dev/webhook-avatars/readarr.png'
-    container_name: readarr
-    image: cr.hotio.dev/hotio/readarr:testing
-    ports:
-      - '8787:8787'
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - UMASK=002
-      - TZ=${TZ}
-    volumes:
-      - ${HOME}/docker/readarr:/config
-      - nfs-media:/media
-    restart: unless-stopped
+    qbt:
+        labels:
+            - 'org.hotio.pullio.notify=true'
+            - 'org.hotio.pullio.update=false'
+            - 'org.hotio.pullio.discord.webhook=${DISCORD_WEBHOOK}'
+            - 'org.hotio.pullio.author.avatar=https://hotio.dev/webhook-avatars/qbittorrent.png'
+            - 'org.hotio.pullio.daily.notify=true'
+            - 'org.hotio.pullio.daily.update=true'
+            - 'org.hotio.pullio.daily.discord.webhook=${DISCORD_WEBHOOK}'
+            - 'org.hotio.pullio.daily.author.avatar=https://hotio.dev/webhook-avatars/qbittorrent.png'
+        container_name: qbt
+        image: cr.hotio.dev/hotio/qbittorrent
+        ports:
+            - '8202:8202'
+            - '8118:8118'
+        environment:
+            - PUID=${PUID}
+            - PGID=${PGID}
+            - UMASK=002
+            - TZ=${TZ}
+            - VPN_ENABLED=true
+            - VPN_LAN_NETWORK=10.17.50/24
+            - VPN_CONF=wg0
+            - VPN_IP_CHECK_DELAY=20
+            - PRIVOXY_ENABLED=false
+            - WEBUI_PORTS=8202/tcp,8202/udp
+        volumes:
+            - $HOME/docker/qbt:/config
+            - nfs-media:/media
+        cap_add:
+            - NET_ADMIN
+        sysctls:
+            - net.ipv4.conf.all.src_valid_mark=1
+            - net.ipv6.conf.all.disable_ipv6=1
+        dns:
+            - 1.1.1.1
+            - 8.8.8.8
+        restart: always
 
-  overseerr:
-    container_name: overseerr
-    image: cr.hotio.dev/hotio/overseerr
-    ports:
-      - '5055:5055'
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - UMASK=002
-      - TZ=${TZ}
-    volumes:
-      - ${HOME}/docker/overseerr:/config
-    restart: unless-stopped
+    tautulli:
+        labels:
+            - 'org.hotio.pullio.notify=true'
+            - 'org.hotio.pullio.update=false'
+            - 'org.hotio.pullio.discord.webhook=${DISCORD_WEBHOOK}'
+            - 'org.hotio.pullio.author.avatar=https://hotio.dev/webhook-avatars/tautulli.png'
+            - 'org.hotio.pullio.daily.notify=true'
+            - 'org.hotio.pullio.daily.update=true'
+            - 'org.hotio.pullio.daily.discord.webhook=${DISCORD_WEBHOOK}'
+            - 'org.hotio.pullio.daily.author.avatar=https://hotio.dev/webhook-avatars/tautulli.png'
+        container_name: tautulli
+        image: cr.hotio.dev/hotio/tautulli
+        environment:
+            - PUID=${PUID}
+            - PGID=${PGID}
+            - TZ=${TZ}
+            - UMASK=002
+        volumes:
+            - ${HOME}/docker/tautulli:/config
+            - ${HOME}/docker/plexmediaserver/Library/Application Support/Plex Media Server/Logs:/logs
+        ports:
+            - 8181:8181
+        restart: unless-stopped
 
-  qbt:
-    labels:
-      - 'org.hotio.pullio.notify=true'
-      - 'org.hotio.pullio.update=false'
-      - 'org.hotio.pullio.discord.webhook=${DISCORD_WEBHOOK}'
-      - 'org.hotio.pullio.author.avatar=https://hotio.dev/webhook-avatars/qbittorrent.png'
-      - 'org.hotio.pullio.daily.notify=true'
-      - 'org.hotio.pullio.daily.update=true'
-      - 'org.hotio.pullio.daily.discord.webhook=${DISCORD_WEBHOOK}'
-      - 'org.hotio.pullio.daily.author.avatar=https://hotio.dev/webhook-avatars/qbittorrent.png'
-    container_name: qbt
-    image: cr.hotio.dev/hotio/qbittorrent
-    ports:
-      - '8202:8202'
-      - '8118:8118'
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - UMASK=002
-      - TZ=${TZ}
-      - VPN_ENABLED=true
-      - VPN_LAN_NETWORK=192.168.1.0/24,10.2.1.0/24
-      - VPN_CONF=wg0
-      # - VPN_ADDITIONAL_PORTS
-      - VPN_IP_CHECK_DELAY=5
-      - PRIVOXY_ENABLED=false
-      - WEBUI_PORTS=8202/tcp,8202/udp
-    volumes:
-      - $HOME/docker/qbt:/config
-      - nfs-media:/media
-    cap_add:
-      - NET_ADMIN
-    sysctls:
-      - net.ipv4.conf.all.src_valid_mark=1
-    restart: unless-stopped
+    teslamate:
+        labels:
+            - 'org.hotio.pullio.notify=true'
+            - 'org.hotio.pullio.update=false'
+            - 'org.hotio.pullio.discord.webhook=${DISCORD_WEBHOOK}'
+            - 'org.hotio.pullio.daily.notify=true'
+            - 'org.hotio.pullio.daily.update=true'
+            - 'org.hotio.pullio.daily.discord.webhook=${DISCORD_WEBHOOK}'
+        image: teslamate/teslamate:latest
+        container_name: teslamate
+        restart: always
+        environment:
+            - ENCRYPTION_KEY=${TM_KEY}
+            - DATABASE_USER=teslamate
+            - DATABASE_PASS=${DB_PASS}
+            - DATABASE_NAME=teslamate
+            - DATABASE_HOST=teslamate_postgres
+            - MQTT_HOST=mosquitto
+        ports:
+            - 4000:4000
+        volumes:
+            - ./import:/opt/app/import
+        cap_drop:
+            - all
 
-  tautulli:
-    labels:
-      - 'org.hotio.pullio.notify=true'
-      - 'org.hotio.pullio.update=false'
-      - 'org.hotio.pullio.discord.webhook=${DISCORD_WEBHOOK}'
-      - 'org.hotio.pullio.author.avatar=https://hotio.dev/webhook-avatars/tautulli.png'
-      - 'org.hotio.pullio.daily.notify=true'
-      - 'org.hotio.pullio.daily.update=true'
-      - 'org.hotio.pullio.daily.discord.webhook=${DISCORD_WEBHOOK}'
-      - 'org.hotio.pullio.daily.author.avatar=https://hotio.dev/webhook-avatars/tautulli.png'
-    container_name: tautulli
-    image: cr.hotio.dev/hotio/tautulli
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
-      - UMASK=002
-    volumes:
-      - ${HOME}/docker/tautulli:/config
-      - ${HOME}/docker/plexmediaserver/Library/Application Support/Plex Media Server/Logs:/logs
-    ports:
-      - 8181:8181
-    restart: unless-stopped
+    teslamate_postgres:
+        labels:
+            - 'org.hotio.pullio.notify=true'
+            - 'org.hotio.pullio.update=false'
+            - 'org.hotio.pullio.discord.webhook=${DISCORD_WEBHOOK}'
+            - 'org.hotio.pullio.daily.notify=true'
+            - 'org.hotio.pullio.daily.update=true'
+            - 'org.hotio.pullio.daily.discord.webhook=${DISCORD_WEBHOOK}'
+        container_name: teslamate_postgres
+        image: postgres:14
+        restart: always
+        # user: '1000:65537'
+        environment:
+            - POSTGRES_USER=teslamate
+            - POSTGRES_PASSWORD=${DB_PASS}
+            - POSTGRES_DB=teslamate
+        volumes:
+            - teslamate-db:/var/lib/postgresql/data
 
-  teslamate:
-    labels:
-      - 'org.hotio.pullio.notify=true'
-      - 'org.hotio.pullio.update=false'
-      - 'org.hotio.pullio.discord.webhook=${DISCORD_WEBHOOK}'
-      - 'org.hotio.pullio.daily.notify=true'
-      - 'org.hotio.pullio.daily.update=true'
-      - 'org.hotio.pullio.daily.discord.webhook=${DISCORD_WEBHOOK}'
-    image: teslamate/teslamate:latest
-    container_name: teslamate
-    restart: always
-    environment:
-      - ENCRYPTION_KEY=${TM_KEY}
-      - DATABASE_USER=teslamate
-      - DATABASE_PASS=${DB_PASS}
-      - DATABASE_NAME=teslamate
-      - DATABASE_HOST=teslamate_postgres
-      - MQTT_HOST=mosquitto
-      # - VIRTUAL_HOST=192.168.1.6
-      # - CHECK_ORIGIN=true
-    ports:
-      - 4000:4000
-    volumes:
-      - ./import:/opt/app/import
-    cap_drop:
-      - all
+    teslamate_grafana:
+        labels:
+            - 'org.hotio.pullio.notify=true'
+            - 'org.hotio.pullio.update=false'
+            - 'org.hotio.pullio.discord.webhook=${DISCORD_WEBHOOK}'
+            - 'org.hotio.pullio.daily.notify=true'
+            - 'org.hotio.pullio.daily.update=true'
+            - 'org.hotio.pullio.daily.discord.webhook=${DISCORD_WEBHOOK}'
+        image: teslamate/grafana:latest
+        container_name: teslamate_grafana
+        restart: always
+        environment:
+            - DATABASE_USER=teslamate
+            - DATABASE_PASS=${DB_PASS}
+            - DATABASE_NAME=teslamate
+            - DATABASE_HOST=teslamate_postgres
+        ports:
+            - 3000:3000
+        volumes:
+            - teslamate-grafana-data:/var/lib/grafana
 
-  teslamate_postgres:
-    labels:
-      - 'org.hotio.pullio.notify=true'
-      - 'org.hotio.pullio.update=false'
-      - 'org.hotio.pullio.discord.webhook=${DISCORD_WEBHOOK}'
-      - 'org.hotio.pullio.daily.notify=true'
-      - 'org.hotio.pullio.daily.update=true'
-      - 'org.hotio.pullio.daily.discord.webhook=${DISCORD_WEBHOOK}'
-    container_name: teslamate_postgres
-    image: postgres:14
-    restart: always
-    # user: '1000:65537'
-    environment:
-      - POSTGRES_USER=teslamate
-      - POSTGRES_PASSWORD=${DB_PASS}
-      - POSTGRES_DB=teslamate
-    volumes:
-      - teslamate-db:/var/lib/postgresql/data
+    mosquitto:
+        labels:
+            - 'org.hotio.pullio.notify=true'
+            - 'org.hotio.pullio.update=false'
+            - 'org.hotio.pullio.discord.webhook=${DISCORD_WEBHOOK}'
+            - 'org.hotio.pullio.daily.notify=true'
+            - 'org.hotio.pullio.daily.update=true'
+            - 'org.hotio.pullio.daily.discord.webhook=${DISCORD_WEBHOOK}'
+        container_name: mosquitto
+        command: mosquitto -c /mosquitto-no-auth.conf
+        image: eclipse-mosquitto:2
+        restart: always
+        ports:
+            - 1883:1883
+        volumes:
+            - ${HOME}/docker/mosquitto/config:/mosquitto/config
+            - ${HOME}/docker/mosquitto/data:/mosquitto/data
 
-  teslamate_grafana:
-    labels:
-      - 'org.hotio.pullio.notify=true'
-      - 'org.hotio.pullio.update=false'
-      - 'org.hotio.pullio.discord.webhook=${DISCORD_WEBHOOK}'
-      - 'org.hotio.pullio.daily.notify=true'
-      - 'org.hotio.pullio.daily.update=true'
-      - 'org.hotio.pullio.daily.discord.webhook=${DISCORD_WEBHOOK}'
-    image: teslamate/grafana:latest
-    container_name: teslamate_grafana
-    restart: always
-    environment:
-      - DATABASE_USER=teslamate
-      - DATABASE_PASS=${DB_PASS}
-      - DATABASE_NAME=teslamate
-      - DATABASE_HOST=teslamate_postgres
-    ports:
-      - 3000:3000
-    volumes:
-      - teslamate-grafana-data:/var/lib/grafana
+    plex:
+        labels:
+            - 'org.hotio.pullio.notify=true'
+            - 'org.hotio.pullio.update=false'
+            - 'org.hotio.pullio.discord.webhook=${DISCORD_WEBHOOK}'
+            - 'org.hotio.pullio.author.avatar=https://hotio.dev/webhook-avatars/plex.png'
+            - 'org.hotio.pullio.daily.notify=true'
+            - 'org.hotio.pullio.daily.update=true'
+            - 'org.hotio.pullio.daily.discord.webhook=${DISCORD_WEBHOOK}'
+            - 'org.hotio.pullio.daily.author.avatar=https://hotio.dev/webhook-avatars/plex.png'
+        image: ghcr.io/linuxserver/plex
+        container_name: plex
+        network_mode: host
+        environment:
+            - PUID=${PUID}
+            - PGID=${PGID}
+            - VERSION=latest
+            # - PLEX_CLAIM= #optional
+        devices:
+            - /dev/dri:/dev/dri
+        volumes:
+            - ${HOME}/docker/plexmediaserver:/config
+            - nfs-media:/media
+        restart: unless-stopped
 
-  homeassistant:
-    labels:
-      - 'org.hotio.pullio.notify=true'
-      - 'org.hotio.pullio.update=false'
-      - 'org.hotio.pullio.discord.webhook=${DISCORD_WEBHOOK}'
-    container_name: homeassistant
-    image: ghcr.io/linuxserver/homeassistant
-    volumes:
-      - ${HOME}/docker/homeassistant:/config
-    environment:
-      - PUID=1000
-      - PGID=65537
-      - TZ=${TZ}
-    restart: unless-stopped
-    network_mode: host
+    calibre-web:
+        labels:
+            - 'org.hotio.pullio.notify=true'
+            - 'org.hotio.pullio.update=false'
+            - 'org.hotio.pullio.discord.webhook=${DISCORD_WEBHOOK}'
+            - 'org.hotio.pullio.daily.notify=true'
+            - 'org.hotio.pullio.daily.update=true'
+            - 'org.hotio.pullio.daily.discord.webhook=${DISCORD_WEBHOOK}'
+        image: lscr.io/linuxserver/calibre-web:latest
+        container_name: calibre-web
+        environment:
+            - PUID=${PUID}
+            - PGID=${PGID}
+            - TZ=${TZ}
+            - DOCKER_MODS=linuxserver/mods:universal-calibre
+        volumes:
+            - ${HOME}/docker/calibre-web:/config
+            - /mnt/media/library/books:/books
+        ports:
+            - 8083:8083
+        restart: unless-stopped
 
-  deconz:
-    labels:
-      - 'org.hotio.pullio.notify=true'
-      - 'org.hotio.pullio.update=false'
-      - 'org.hotio.pullio.discord.webhook=${DISCORD_WEBHOOK}'
-      - 'org.hotio.pullio.daily.notify=true'
-      - 'org.hotio.pullio.daily.update=true'
-      - 'org.hotio.pullio.daily.discord.webhook=${DISCORD_WEBHOOK}'
-    container_name: deconz
-    network_mode: host
-    restart: always
-    volumes:
-      # - /etc/localtime:/etc/localtime:ro
-      - ${HOME}/docker/deconz:/root/.local/share/dresden-elektronik/deCONZ
-    devices:
-      - /dev/ttyACM0
-    image: marthoc/deconz
-    environment:
-      - DECONZ_WEB_PORT=8454
-      - DECONZ_WS_PORT=8545
-      - DECONZ_DEVICE=/dev/ttyACM0
+    kavita:
+        image: kizaing/kavita:latest
+        volumes:
+            - nfs-media:/media
+            - ${HOME}/docker/kavita:/kavita/config
+        ports:
+            - '5000:5000'
+        restart: unless-stopped
 
-  mosquitto:
-    labels:
-      - 'org.hotio.pullio.notify=true'
-      - 'org.hotio.pullio.update=false'
-      - 'org.hotio.pullio.discord.webhook=${DISCORD_WEBHOOK}'
-      - 'org.hotio.pullio.daily.notify=true'
-      - 'org.hotio.pullio.daily.update=true'
-      - 'org.hotio.pullio.daily.discord.webhook=${DISCORD_WEBHOOK}'
-    container_name: mosquitto
-    command: mosquitto -c /mosquitto-no-auth.conf
-    image: eclipse-mosquitto:2
-    restart: always
-    ports:
-      - 1883:1883
-    volumes:
-      - mosquitto-conf:/mosquitto/config
-      - mosquitto-data:/mosquitto/data
+    channels-dvr:
+        image: fancybits/channels-dvr:tve
+        container_name: channels-dvr
+        network_mode: host
+        ports:
+            - '8089:8089'
+        restart: always
+        devices:
+            - /dev/dri:/dev/dri
+        volumes:
+            - ${HOME}/docker/channels:/channels-dvr
+            - nfs-media:/nfs-media
 
-  plex:
-    labels:
-      - 'org.hotio.pullio.notify=true'
-      - 'org.hotio.pullio.update=false'
-      - 'org.hotio.pullio.discord.webhook=${DISCORD_WEBHOOK}'
-      - 'org.hotio.pullio.author.avatar=https://hotio.dev/webhook-avatars/plex.png'
-      - 'org.hotio.pullio.daily.notify=true'
-      - 'org.hotio.pullio.daily.update=true'
-      - 'org.hotio.pullio.daily.discord.webhook=${DISCORD_WEBHOOK}'
-      - 'org.hotio.pullio.daily.author.avatar=https://hotio.dev/webhook-avatars/plex.png'
-    image: ghcr.io/linuxserver/plex
-    container_name: plex
-    network_mode: host
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - VERSION=latest
-      # - PLEX_CLAIM= #optional
-    devices:
-      - /dev/dri:/dev/dri
-    volumes:
-      - ${HOME}/docker/plexmediaserver:/config
-      - nfs-media:/media
-    restart: unless-stopped
+    valheim:
+        image: mbround18/valheim:latest
+        stop_signal: SIGINT
+        restart: always
+        ports:
+            - '2456:2456/udp'
+            - '2457:2457/udp'
+            - '2458:2458/udp'
+            - '2459:2459/tcp'
+        environment:
+            PORT: 2456
+            NAME: 'Saterdalands'
+            WORLD: 'Saterdalands'
+            PASSWORD: ${VALHEIMPASS}
+            TZ: ${TZ}
+            PUBLIC: 1
+            AUTO_BACKUP: 1
+            AUTO_BACKUP_SCHEDULE: '*/15 * * * *'
+            AUTO_BACKUP_REMOVE_OLD: 1
+            AUTO_BACKUP_DAYS_TO_LIVE: 3
+            AUTO_BACKUP_ON_UPDATE: 1
+            AUTO_BACKUP_ON_SHUTDOWN: 1
+            AUTO_BACKUP_PAUSE_WITH_NO_PLAYERS: 1
+            ADDRESS: 127.0.0.1:2457
+            HTTP_PORT: 2459
+            DEBUG_MODE: 1
+        volumes:
+            - ./valheim/saves:/home/steam/.config/unity3d/IronGate/Valheim
+            - ./valheim/server:/home/steam/valheim
 
-  calibre-web:
-    labels:
-      - 'org.hotio.pullio.notify=true'
-      - 'org.hotio.pullio.update=false'
-      - 'org.hotio.pullio.discord.webhook=${DISCORD_WEBHOOK}'
-      - 'org.hotio.pullio.daily.notify=true'
-      - 'org.hotio.pullio.daily.update=true'
-      - 'org.hotio.pullio.daily.discord.webhook=${DISCORD_WEBHOOK}'
-    image: lscr.io/linuxserver/calibre-web:latest
-    container_name: calibre-web
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
-      - DOCKER_MODS=linuxserver/mods:universal-calibre
-    volumes:
-      - ${HOME}/docker/calibre-web:/config
-      - /mnt/media/library/books:/books
-    ports:
-      - 8083:8083
-    restart: unless-stopped
+    plex-meta-manager:
+        image: meisnate12/plex-meta-manager
+        container_name: plex-meta-manager
+        environment:
+            - TZ=${TZ}
+        volumes:
+            - ${HOME}/docker/plex-meta-manager:/config
+        restart: unless-stopped
 
-  pihole:
-    labels:
-      - 'org.hotio.pullio.notify=true'
-      - 'org.hotio.pullio.update=false'
-      - 'org.hotio.pullio.discord.webhook=${DISCORD_WEBHOOK}'
-      - 'org.hotio.pullio.daily.notify=true'
-      - 'org.hotio.pullio.daily.update=true'
-      - 'org.hotio.pullio.daily.discord.webhook=${DISCORD_WEBHOOK}'
-    container_name: pihole
-    image: pihole/pihole:latest
-    hostname: pihole
-    ports:
-      - '53:53/tcp'
-      - '53:53/udp'
-      - '8127:80/tcp'
-    environment:
-      TZ: ${TZ}
-      WEBPASSWORD: ${PASSWORD}
-      FTLCONF_REPLY_ADDR4: 192.168.1.6
-    volumes:
-      - ${HOME}/docker/pihole/etc-pihole:/etc/pihole
-      - ${HOME}/docker/pihole/etc-dnsmasq.d:/etc/dnsmasq.d
-    restart: unless-stopped
-
-  valheim:
-    image: mbround18/valheim:latest
-    stop_signal: SIGINT
-    ports:
-      - '2456:2456/udp'
-      - '2457:2457/udp'
-      - '2458:2458/udp'
-      - '2459:2459/tcp'
-    environment:
-      PORT: 2456
-      NAME: 'Saterdalands'
-      WORLD: 'Saterdalands'
-      PASSWORD: ${VALHEIMPASS}
-      TZ: ${TZ}
-      PUBLIC: 1
-      AUTO_UPDATE: 1
-      AUTO_UPDATE_SCHEDULE: '0 2 * * *'
-      AUTO_UPDATE_PAUSE_WITH_PLAYERS: 1
-      AUTO_BACKUP: 1
-      AUTO_BACKUP_SCHEDULE: '*/15 * * * *'
-      AUTO_BACKUP_REMOVE_OLD: 1
-      AUTO_BACKUP_DAYS_TO_LIVE: 3
-      AUTO_BACKUP_ON_UPDATE: 1
-      AUTO_BACKUP_ON_SHUTDOWN: 1
-      AUTO_BACKUP_PAUSE_WITH_NO_PLAYERS: 1
-      HTTP_PORT: 2459
-    volumes:
-      - ./valheim/saves:/home/steam/.config/unity3d/IronGate/Valheim
-      - ./valheim/server:/home/steam/valheim
+    jackett:
+        container_name: jackett
+        image: cr.hotio.dev/hotio/jackett
+        restart: unless-stopped
+        ports:
+            - '9117:9117'
+        environment:
+            - PUID=${PUID}
+            - PGID=${PGID}
+            - TZ=${TZ}
+            - UMASK=002
+        volumes:
+            - ${HOME}/docker/jackett:/config
 
 volumes:
-  teslamate-db:
-  teslamate-grafana-data:
-  mosquitto-conf:
-  mosquitto-data:
-  nfs-media:
-    driver_opts:
-      type: nfs
-      o: addr=192.168.1.5,rw,hard,intr
-      device: :/volume1/media
-  rey-books:
-    driver_opts:
-      type: nfs
-      o: addr=192.168.1.5,rw,hard,intr
-      device: :/volume1/media/library/books
-
+    teslamate-db:
+    teslamate-grafana-data:
+    nfs-media:
+        driver_opts:
+            type: nfs
+            o: addr=10.17.50.5,rw,hard,intr
+            device: :/volume1/media
+    rey-books:
+        driver_opts:
+            type: nfs
+            o: addr=10.17.50.5,rw,hard,intr
+            device: :/volume1/media/library/books
 networks:
-  default:
-    name: $DOCKER_NETWORK
-    external: true
+    default:
+        name: $DOCKER_NETWORK
+        external: true
 
 secrets:
-  password:
-    file: ./secrets/flame_password
+    password:
+        file: ./secrets/flame_password
