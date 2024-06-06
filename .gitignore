@@ -1,0 +1,7 @@
+*
+!.gitignore
+!compose.yml
+!homer
+!homer/icons
+!homer/icons/**
+!homer/config.yml

@@ -1,0 +1,337 @@
+services:
+    cloudflare-ddns:
+        image: oznu/cloudflare-ddns:latest
+        restart: always
+        environment:
+            - API_KEY=${CF_DDNS_API}
+            - ZONE=satrday.io
+            - SUBDOMAIN=home
+            - PROXIED=false
+
+    homer:
+        image: b4bz/homer
+        container_name: homer
+        volumes:
+            - ${HOME}/docker/homer:/www/assets
+        ports:
+            - 8777:8080
+        user: ${PUID}:${PGID} # default
+        environment:
+            - INIT_ASSETS=1 # default
+        restart: unless-stopped
+
+    kometa:
+        image: kometateam/kometa
+        container_name: kometa
+        environment:
+            - TZ=${TZ} #optional
+        volumes:
+            - ${HOME}/docker/kometa:/config
+        restart: unless-stopped
+    recyclarr:
+        image: ghcr.io/recyclarr/recyclarr
+        container_name: recyclarr
+        user: ${PUID}:${PGID}
+        volumes:
+          - ${HOME}/docker/recyclarr:/config
+        environment:
+          - TZ=${TZ}
+    sonarr:
+        container_name: sonarr
+        image: ghcr.io/hotio/sonarr
+        hostname: sonarr
+        ports:
+            - '8989:8989'
+        environment:
+            - PUID=${PUID}
+            - PGID=${PGID}
+            - UMASK=002
+            - TZ=${TZ}
+        volumes:
+            - ${HOME}/docker/sonarr:/config
+            - nfs-media:/media
+        restart: unless-stopped
+
+    sabnzbd:
+        container_name: sabnzbd
+        image: ghcr.io/hotio/sabnzbd
+        ports:
+            - '8080:8080'
+        environment:
+            - PUID=${PUID}
+            - PGID=${PGID}
+            - TZ=${TZ}
+            - UMASK=002
+        volumes:
+            - ${HOME}/docker/sabnzbd:/config
+            - nfs-media:/media
+        restart: unless-stopped
+
+    radarr:
+        container_name: radarr
+        image: ghcr.io/hotio/radarr
+        environment:
+            - PUID=${PUID}
+            - PGID=${PGID}
+            - TZ=${TZ}
+            - UMASK=002
+        volumes:
+            - ${HOME}/docker/radarr:/config
+            - nfs-media:/media
+        ports:
+            - 7878:7878
+        restart: unless-stopped
+
+    # radarr4k:
+    #     labels:
+    #         - 'org.hotio.pullio.daily.update=true'
+    #     container_name: radarr4k
+    #     image: ghcr.io/hotio/radarr
+    #     environment:
+    #         - PUID=${PUID}
+    #         - PGID=${PGID}
+    #         - TZ=${TZ}
+    #         - UMASK=002
+    #     volumes:
+    #         - ${HOME}/docker/radarr4k:/config
+    #         - nfs-media:/media
+    #     ports:
+    #         - 7880:7878
+    #     restart: unless-stopped
+
+    prowlarr:
+        container_name: prowlarr
+        image: ghcr.io/hotio/prowlarr
+        environment:
+            - PUID=${PUID}
+            - PGID=${PGID}
+            - TZ=${TZ}
+            - UMASK=002
+        volumes:
+            - ${HOME}/docker/prowlarr:/config
+        ports:
+            - 9696:9696
+        restart: unless-stopped
+
+    bazarr:
+        container_name: bazarr
+        image: ghcr.io/hotio/bazarr
+        ports:
+            - '6767:6767'
+        environment:
+            - PUID=${PUID}
+            - PGID=${PGID}
+            - UMASK=002
+            - TZ=${TZ}
+        restart: unless-stopped
+        volumes:
+            - ${HOME}/docker/bazarr:/config
+            - nfs-media:/media
+
+    readarr:
+        container_name: readarr
+        image: ghcr.io/hotio/readarr
+        ports:
+            - '8787:8787'
+        environment:
+            - PUID=${PUID}
+            - PGID=${PGID}
+            - UMASK=002
+            - TZ=${TZ}
+        volumes:
+            - ${HOME}/docker/readarr:/config
+            - nfs-media:/media
+        restart: unless-stopped
+
+    overseerr:
+        container_name: overseerr
+        image: ghcr.io/hotio/overseerr
+        ports:
+            - '5055:5055'
+        environment:
+            - PUID=${PUID}
+            - PGID=${PGID}
+            - UMASK=002
+            - TZ=${TZ}
+        volumes:
+            - ${HOME}/docker/overseerr:/config
+        restart: unless-stopped
+
+    qbt:
+        container_name: qbt
+        image: ghcr.io/hotio/qbittorrent
+        ports:
+            - '8202:8202'
+            - '8118:8118'
+        environment:
+            - PUID=${PUID}
+            - PGID=${PGID}
+            - UMASK=002
+            - TZ=${TZ}
+            - VPN_ENABLED=true
+            - VPN_LAN_NETWORK=10.17.50/24
+            - VPN_CONF=wg0
+            - VPN_IP_CHECK_DELAY=20
+            - PRIVOXY_ENABLED=false
+            - WEBUI_PORTS=8202/tcp,8202/udp
+        volumes:
+            - $HOME/docker/qbt:/config
+            - nfs-media:/media
+        cap_add:
+            - NET_ADMIN
+        sysctls:
+            - net.ipv4.conf.all.src_valid_mark=1
+            - net.ipv6.conf.all.disable_ipv6=1
+        dns:
+            - 1.1.1.1
+            - 8.8.8.8
+        restart: unless-stopped
+
+    tautulli:
+        container_name: tautulli
+        image: ghcr.io/hotio/tautulli
+        environment:
+            - PUID=${PUID}
+            - PGID=${PGID}
+            - TZ=${TZ}
+            - UMASK=002
+        volumes:
+            - ${HOME}/docker/tautulli:/config
+            - ${HOME}/docker/plex/Library/Application Support/Plex Media Server/Logs:/logs
+        ports:
+            - 8181:8181
+        restart: unless-stopped
+
+    teslamate:
+        image: teslamate/teslamate:latest
+        container_name: teslamate
+        restart: always
+        environment:
+            - ENCRYPTION_KEY=${TM_KEY}
+            - DATABASE_USER=teslamate
+            - DATABASE_PASS=${DB_PASS}
+            - DATABASE_NAME=teslamate
+            - DATABASE_HOST=teslamate_postgres
+            - MQTT_HOST=mosquitto
+            - VIRTUAL_HOST=tesla.${LAN_DOMAIN}
+            - CHECK_ORIGIN=true
+        ports:
+            - 4000:4000
+        volumes:
+            - ./import:/opt/app/import
+        cap_drop:
+            - all
+
+    teslamate_postgres:
+        container_name: teslamate_postgres
+        image: postgres:14
+        restart: always
+        environment:
+            - POSTGRES_USER=teslamate
+            - POSTGRES_PASSWORD=${DB_PASS}
+            - POSTGRES_DB=teslamate
+        volumes:
+            - teslamate-db:/var/lib/postgresql/data
+
+    teslamate_grafana:
+        image: teslamate/grafana:latest
+        container_name: teslamate_grafana
+        restart: always
+        environment:
+            - DATABASE_USER=teslamate
+            - DATABASE_PASS=${DB_PASS}
+            - DATABASE_NAME=teslamate
+            - DATABASE_HOST=teslamate_postgres
+            - GF_SERVER_DOMAIN=tesla.${LAN_DOMAIN}
+            - GF_SERVER_ROOT_URL=%(protocol)s://%(domain)s/grafana
+            - GF_SERVER_SERVE_FROM_SUB_PATH=true
+        ports:
+            - 3000:3000
+        volumes:
+            - teslamate-grafana-data:/var/lib/grafana
+
+    mosquitto:
+        container_name: mosquitto
+        command: mosquitto -c /mosquitto-no-auth.conf
+        image: eclipse-mosquitto:2
+        restart: always
+        ports:
+            - 1883:1883
+        volumes:
+            - ${HOME}/docker/mosquitto/config:/mosquitto/config
+            - ${HOME}/docker/mosquitto/data:/mosquitto/data
+
+    calibre-web:
+        image: lscr.io/linuxserver/calibre-web:latest
+        container_name: calibre-web
+        environment:
+            - PUID=${PUID}
+            - PGID=${PGID}
+            - TZ=${TZ}
+            - DOCKER_MODS=linuxserver/mods:universal-calibre
+        volumes:
+            - ${HOME}/docker/calibre-web:/config
+            - /mnt/media/library/books:/books
+        ports:
+            - 8083:8083
+        restart: unless-stopped
+
+    # channels-dvr:
+    #     image: fancybits/channels-dvr:tve
+    #     container_name: channels-dvr
+    #     network_mode: host
+    #     ports:
+    #         - '8089:8089'
+    #     devices:
+    #         - /dev/dri:/dev/dri
+    #     volumes:
+    #         - ${HOME}/docker/channels:/channels-dvr
+    #         - nfs-media:/nfs-media
+    #     restart: always
+
+    jackett:
+        container_name: jackett
+        image: ghcr.io/hotio/jackett
+        restart: unless-stopped
+        ports:
+            - '9117:9117'
+        environment:
+            - PUID=${PUID}
+            - PGID=${PGID}
+            - TZ=${TZ}
+            - UMASK=002
+        volumes:
+            - ${HOME}/docker/jackett:/config
+
+    kavita:
+        image: lscr.io/linuxserver/kavita:latest
+        container_name: kavita
+        environment:
+            - PUID=${PUID}
+            - PGID=${PGID}
+            - TZ=${TZ}
+        volumes:
+            - ${HOME}/docker/kavita:/config
+            - rey-dev:/ups
+        ports:
+            - 5000:5000
+        restart: unless-stopped
+
+volumes:
+    teslamate-db:
+    teslamate-grafana-data:
+    nfs-media:
+        driver_opts:
+            type: nfs
+            o: addr=10.17.50.5,rw,hard,intr
+            device: :/volume1/media
+    rey-books:
+        driver_opts:
+            type: nfs
+            o: addr=10.17.50.5,rw,hard,intr
+            device: :/volume1/media/library/books
+    rey-dev:
+        driver_opts:
+            type: nfs
+            o: addr=10.17.50.5,rw,hard,intr
+            device: :/volume1/ups
