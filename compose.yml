@@ -303,9 +303,31 @@ services:
             - DOCKER_MODS=linuxserver/mods:universal-calibre
         volumes:
             - ${HOME}/docker/calibre-web:/config
-            - /mnt/media/library/books:/books
+            - rey-books:/books
         ports:
             - 8083:8083
+        restart: unless-stopped
+
+    calibre:
+        image: lscr.io/linuxserver/calibre:latest
+        container_name: calibre
+        security_opt:
+            - seccomp:unconfined #optional
+        environment:
+            - PUID=${PUID}
+            - PGID=${PGID}
+            - TZ=${TZ}
+            - CUSTOM_PORT=8084
+        volumes:
+            - ${HOME}/docker/calibre:/config
+            - rey-books:/books
+        ports:
+            - 8084:8084
+            - 8182:8181
+            - 8081:8081
+        depends_on:
+            calibre-web:
+                condition: service_started
         restart: unless-stopped
 
     # channels-dvr:
