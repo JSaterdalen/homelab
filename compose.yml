@@ -37,6 +37,11 @@ services:
         environment:
           - TZ=${TZ}
     sonarr:
+        labels:
+            - "org.hotio.pullio.notify=true"
+            - "org.hotio.pullio.update=false"
+            - "org.hotio.pullio.discord.webhook=${DISCORD_WEBHOOK}"
+            - "org.hotio.pullio.author.avatar=https://raw.githubusercontent.com/NX211/homer-icons/master/png/sonarr.png"
         container_name: sonarr
         image: ghcr.io/hotio/sonarr
         hostname: sonarr
@@ -53,6 +58,11 @@ services:
         restart: unless-stopped
 
     sabnzbd:
+        labels:
+            - "org.hotio.pullio.notify=true"
+            - "org.hotio.pullio.update=false"
+            - "org.hotio.pullio.discord.webhook=${DISCORD_WEBHOOK}"
+            - "org.hotio.pullio.author.avatar=https://raw.githubusercontent.com/NX211/homer-icons/master/png/sabnzbd.png"
         container_name: sabnzbd
         image: ghcr.io/hotio/sabnzbd
         ports:
@@ -68,6 +78,11 @@ services:
         restart: unless-stopped
 
     radarr:
+        labels:
+            - "org.hotio.pullio.notify=true"
+            - "org.hotio.pullio.update=false"
+            - "org.hotio.pullio.discord.webhook=${DISCORD_WEBHOOK}"
+            - "org.hotio.pullio.author.avatar=https://raw.githubusercontent.com/NX211/homer-icons/master/png/radarr.png"
         container_name: radarr
         image: ghcr.io/hotio/radarr
         environment:
@@ -144,6 +159,11 @@ services:
         restart: unless-stopped
 
     overseerr:
+        labels:
+            - "org.hotio.pullio.notify=true"
+            - "org.hotio.pullio.update=false"
+            - "org.hotio.pullio.discord.webhook=${DISCORD_WEBHOOK}"
+            - "org.hotio.pullio.author.avatar=https://raw.githubusercontent.com/NX211/homer-icons/master/png/overseerr.png"
         container_name: overseerr
         image: ghcr.io/hotio/overseerr
         ports:
@@ -188,6 +208,11 @@ services:
         restart: unless-stopped
 
     tautulli:
+        labels:
+            - "org.hotio.pullio.notify=true"
+            - "org.hotio.pullio.update=false"
+            - "org.hotio.pullio.discord.webhook=${DISCORD_WEBHOOK}"
+            - "org.hotio.pullio.author.avatar=https://raw.githubusercontent.com/NX211/homer-icons/master/png/tautulli.png"
         container_name: tautulli
         image: ghcr.io/hotio/tautulli
         environment:
@@ -203,6 +228,11 @@ services:
         restart: unless-stopped
 
     teslamate:
+        labels:
+            - "org.hotio.pullio.notify=true"
+            - "org.hotio.pullio.update=false"
+            - "org.hotio.pullio.discord.webhook=${DISCORD_WEBHOOK}"
+            - "org.hotio.pullio.author.avatar=https://docs.teslamate.org/img/logo.svg"
         image: teslamate/teslamate:latest
         container_name: teslamate
         restart: always
