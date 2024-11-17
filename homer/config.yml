@@ -161,7 +161,7 @@ services:
             tag: 'app'
 
           - name: 'calibre-web'
-            url: 'http://10.17.50.6:8083/'
+            url: 'https://books.satrday.io'
             logo: 'https://raw.githubusercontent.com/NX211/homer-icons/master/svg/calibreweb.svg'
             subtitle: ''
             tag: 'app'
@@ -203,7 +203,7 @@ services:
             tag: 'app'
 
           - name: 'readarr'
-            url: 'http://10.17.50.6:8787/'
+            url: 'https://readarr.lan.satrday.io'
             logo: 'https://raw.githubusercontent.com/NX211/homer-icons/master/svg/readarr.svg'
             subtitle: ''
             tag: 'app'
@@ -227,7 +227,7 @@ services:
             tag: 'app'
 
           - name: 'Tautulli'
-            url: 'http://10.17.50.6:8181/home'
+            url: 'https://tau.lan.satrday.io'
             logo: 'https://raw.githubusercontent.com/NX211/homer-icons/master/svg/tautulli.svg'
             subtitle: ''
             tag: 'app'
