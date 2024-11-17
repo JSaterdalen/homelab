@@ -243,9 +243,10 @@ services:
             - DATABASE_PASS=${DB_PASS}
             - DATABASE_NAME=teslamate
             - DATABASE_HOST=teslamate_postgres
-            - MQTT_HOST=mosquitto
+            - MQTT_HOST=10.17.50.14
             - VIRTUAL_HOST=tesla.${LAN_DOMAIN}
-            - CHECK_ORIGIN=true
+            - CHECK_ORIGIN=false
+            - TZ=${TZ}
         ports:
             - 4000:4000
         volumes:
