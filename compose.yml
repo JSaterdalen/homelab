@@ -282,17 +282,6 @@ services:
         volumes:
             - teslamate-grafana-data:/var/lib/grafana
 
-    mosquitto:
-        container_name: mosquitto
-        command: mosquitto -c /mosquitto-no-auth.conf
-        image: eclipse-mosquitto:2
-        restart: always
-        ports:
-            - 1883:1883
-        volumes:
-            - ${HOME}/docker/mosquitto/config:/mosquitto/config
-            - ${HOME}/docker/mosquitto/data:/mosquitto/data
-
     calibre-web:
         image: lscr.io/linuxserver/calibre-web:latest
         container_name: calibre-web
