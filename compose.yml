@@ -256,7 +256,7 @@ services:
 
     teslamate_postgres:
         container_name: teslamate_postgres
-        image: postgres:14
+        image: postgres:16
         restart: always
         environment:
             - POSTGRES_USER=teslamate
